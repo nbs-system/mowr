@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="center">
+        <div class="container">
+            <div class="container">
+                <h2>Welcome on MOWR !</h2>
+                <h5>A cool web-malware detector</h5>
+            </div>
+        </div>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" class="btn btn-default btn-input">
+            <input type="submit" value="Upload" class="btn btn-info">
+        </form>
+    </div>
+{% endblock %}
+

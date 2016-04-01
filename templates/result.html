@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+    Scan result:
+    <table class="table table-bordered">
+        <tr><td colspan="2" class="active">File hashes</td></tr>
+        <tr><td>MD5</td><td>{{ file['md5'] }}</td></tr>
+        <tr><td>Sha256</td><td>{{ file['sha256'] }}</td></tr>
+        <tr><td>SSDeep</td><td>{{ file['ssdeep'] }}</td></tr>
+
+        <tr><td colspan="2" class="active">Dates</td></tr>
+        <tr><td>First analysis</td><td>{{ file['first_analysis'] }}</td></tr>
+        <tr><td>Last analysis</td><td>{{ file['last_analysis'] }}</td></tr>
+
+        <tr><td colspan="2" class="active">File analysis</td></tr>
+        <tr><td>PMF</td><td>{{ file['pmf_analysis'] }}</td></tr>
+    </table>
+
+    <a href="/"><span class="btn btn-info">Upload a new file</span></a>
+{% endblock %}
+
