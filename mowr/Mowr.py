@@ -1,29 +1,31 @@
-from flask import Flask, render_template, request, redirect, abort
-from flask.ext.pymongo import PyMongo
+import os
 from hashlib import sha256
 from shutil import move
-import Analyser
-import os
 
-""" Configuration """
+from flask import Flask, render_template, request, redirect, abort
+from flask.ext.pymongo import PyMongo
+
+import Analyser
+
+# Configuration
 app = Flask(__name__)
 app.config['TMP_FOLDER'] = '/tmp/uploads'
 app.config['UPLOAD_FOLDER'] = '/tmp/uploads/lulz'
 mongo = PyMongo(app)
 
-""" Custom functions """
+# Custom functions
 def getFileLocation(sha256sum):
     return '{0}/{1}'.format(app.config['UPLOAD_FOLDER'], sha256sum)
 
-""" Routes """
+# Routes
 @app.route('/upload', methods=['POST'])
 def upload():
     # Save file in temp folder
     file = request.files['file']
 
     #TODO check file length
-    #Add tags
-    #todo hash cote client
+    #TODO Add tags for pmf answer (+bootstrap)
+    #TODO hash cote client
 
     # Check user input
     path = os.path.join(app.config['TMP_FOLDER'], file.filename)
@@ -78,7 +80,7 @@ def file(id, action):
 def index():
     return render_template('index.html')
 
-""" Error handlers """
+# Error handlers
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
@@ -87,10 +89,10 @@ def page_not_found(e):
 def page_not_found(e):
     return render_template('500.html'), 500
 
-if __name__ == '__main__':
+def run():
+    # Check folder access
     if not os.access(app.config['TMP_FOLDER'], os.W_OK) or not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
         print("Either TMP_FOLDER or UPLOAD_FOLDER is not writable. Please update the configuration.")
-
 
     app.debug = True
     app.run()

@@ -1,10 +1,13 @@
-from flask import abort
-from hashlib import sha256, md5
-from datetime import datetime
-from bson.objectid import ObjectId, InvalidId
 import subprocess
+from datetime import datetime
+from hashlib import sha256, md5
+
 import ssdeep
-import mowr
+from bson.objectid import ObjectId, InvalidId
+from flask import abort
+
+import Mowr
+
 
 class Analyser():
     def __init__(self, mongo, file=None, id=None):
@@ -22,7 +25,7 @@ class Analyser():
         # Get file path
         if self.file is None:
             sha256sum = self.db.files.find_one_or_404({"_id": ObjectId(self.id)})['sha256']
-            self.file = mowr.getFileLocation(sha256sum)
+            self.file = Mowr.getFileLocation(sha256sum)
 
     def loadConfig(self):
         #TODO Move it in the main and maybe git pull etc.
@@ -39,6 +42,7 @@ class Analyser():
 
         # Start the analysis
         # TODO yara bindings
+        # TODO add tests
         analysis = subprocess.check_output(
                 [self.pmf_bin, self.file]
                 )
