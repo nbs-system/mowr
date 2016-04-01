@@ -1,17 +1,9 @@
 import os
 from hashlib import sha256
 from shutil import move
-
-from flask import Flask, render_template, request, redirect, abort, url_for
-from flask.ext.pymongo import PyMongo
-
-import Analyser
-
-# Configuration
-app = Flask(__name__)
-app.config['TMP_FOLDER'] = '/tmp/uploads'
-app.config['UPLOAD_FOLDER'] = '/tmp/uploads/lulz'
-mongo = PyMongo(app)
+from flask import render_template, request, redirect, abort, url_for
+from mowr import app, mongo
+from mowr.analyser import Analyser
 
 # Custom functions
 def getFileLocation(sha256sum):
@@ -53,7 +45,7 @@ def upload():
     move(file, newfile)
 
     # Then analyse it and show results
-    analyser = Analyser.Analyser(mongo, newfile)
+    analyser = Analyser(mongo, newfile)
     id = analyser.analyse()
     return redirect(url_for('file', id=id, action='analysis'))
 
@@ -61,7 +53,7 @@ def upload():
 @app.route('/file/<id>/<action>', methods=['GET', 'POST'])
 def file(id, action):
     # Init analyser to check the id
-    analyser = Analyser.Analyser(mongo, None, id)
+    analyser = Analyser(mongo, None, id)
 
     # Handle action
     if action == 'choose':
@@ -88,12 +80,3 @@ def page_not_found(e):
 @app.errorhandler(500)
 def page_not_found(e):
     return render_template('500.html'), 500
-
-def run():
-    # Check folder access
-    if not os.access(app.config['TMP_FOLDER'], os.W_OK) or not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
-        print("Either TMP_FOLDER or UPLOAD_FOLDER is not writable. Please update the configuration.")
-
-    app.debug = True
-    app.run()
-

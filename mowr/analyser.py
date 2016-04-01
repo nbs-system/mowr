@@ -6,7 +6,7 @@ import ssdeep
 from bson.objectid import ObjectId, InvalidId
 from flask import abort
 
-import Mowr
+import views
 
 
 class Analyser():
@@ -25,7 +25,7 @@ class Analyser():
         # Get file path
         if self.file is None:
             sha256sum = self.db.files.find_one_or_404({"_id": ObjectId(self.id)})['sha256']
-            self.file = Mowr.getFileLocation(sha256sum)
+            self.file = views.getFileLocation(sha256sum)
 
     def loadConfig(self):
         #TODO Move it in the main and maybe git pull etc.
