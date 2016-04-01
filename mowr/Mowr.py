@@ -2,7 +2,7 @@ import os
 from hashlib import sha256
 from shutil import move
 
-from flask import Flask, render_template, request, redirect, abort
+from flask import Flask, render_template, request, redirect, abort, url_for
 from flask.ext.pymongo import PyMongo
 
 import Analyser
@@ -31,7 +31,7 @@ def upload():
     path = os.path.join(app.config['TMP_FOLDER'], file.filename)
     if os.path.isdir(path):
         #TODO add flash error
-        return redirect('/')
+        return redirect(url_for('index'))
 
     file.save(path)
     file = path
@@ -46,7 +46,7 @@ def upload():
     if f is not None:
         id = f["_id"]
         os.remove(file)
-        return redirect('/file/%s/choice' % id)
+        return redirect(url_for('file', id=id, action='choose'))
 
     # If it is the first time, save the file to the correct location and delete the old one
     newfile = getFileLocation(sha256sum)
@@ -55,7 +55,7 @@ def upload():
     # Then analyse it and show results
     analyser = Analyser.Analyser(mongo, newfile)
     id = analyser.analyse()
-    return redirect('/file/%s/analysis' % id)
+    return redirect(url_for('file', id=id, action='analysis'))
 
 
 @app.route('/file/<id>/<action>', methods=['GET', 'POST'])
@@ -64,7 +64,7 @@ def file(id, action):
     analyser = Analyser.Analyser(mongo, None, id)
 
     # Handle action
-    if action == 'choice':
+    if action == 'choose':
         return render_template('choose.html', id=id)
     elif action == 'analysis':
         f = analyser.getInfos()

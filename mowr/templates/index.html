@@ -7,7 +7,7 @@
                 <h5>A cool web-malware detector</h5>
             </div>
         </div>
-        <form action="/upload" method="post" enctype="multipart/form-data">
+        <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
             <input type="file" name="file" class="btn btn-default btn-input">
             <input type="submit" value="Upload" class="btn btn-info">
         </form>
