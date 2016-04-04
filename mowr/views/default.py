@@ -6,10 +6,6 @@ from os import chmod
 
 default = Blueprint('default', __name__)
 
-def errorUpload():
-    flash('There was an error while uploading the file. Please try with a different file.', 'danger')
-    return redirect(url_for('default.index'))
-
 # TODO
 def tagnameToColor(tag):
     return choice(['primary', 'danger', 'success', 'default', 'warning'])
@@ -22,11 +18,17 @@ def upload():
     # Check file param
     file = request.files.get('file')
     if file is None:
-        return errorUpload()
+        flash('There was an error while uploading the file. Please try with a different file.', 'danger')
+        return redirect(url_for('default.index'))
 
     # Check size (I think Flask is doing this by itself, but we never know...)
     if request.content_length >= current_app.config['MAX_CONTENT_LENGTH']:
         abort(413)
+
+    # Check file mime type
+    if file.content_type not in current_app.config['ALLOWED_MIME']:
+        flash('Sorry, this file type is not allowed. Please try with another one.', 'warning')
+        return redirect(url_for('default.index'))
 
     # Check the file sha256 and if it already exists
     sha256sum = sha256(file.stream.read()).hexdigest()
