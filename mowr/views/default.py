@@ -2,7 +2,7 @@ from hashlib import sha256
 
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app
 
-from model.analyser import Analyser
+from mowr.model.analyser import Analyser
 
 default = Blueprint('default', __name__)
 

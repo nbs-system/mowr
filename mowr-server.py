@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from mowr import create_app
-import sys
 import os
 
 def __get_config_file():
