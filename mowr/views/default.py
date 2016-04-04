@@ -1,9 +1,8 @@
 from hashlib import sha256
-
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app
-
 from mowr.model.analyser import Analyser
 from random import choice
+from os import chmod
 
 default = Blueprint('default', __name__)
 
@@ -43,6 +42,8 @@ def upload():
     # Seek is needed because of the above file.stream.read()
     file.stream.seek(0)
     file.save(newfile)
+    # Chmod the file to prevent it from being executed
+    chmod(newfile, 0400)
 
     # Then analyse it and show results
     analyser = Analyser(newfile)
