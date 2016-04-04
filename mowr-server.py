@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 from mowr import create_app
+import sys
 import os
 
 def __get_config_file():
     return os.path.join(os.path.dirname(os.path.abspath(__name__)), 'config.cfg')
 
-if __name__ == '__main__':
+def run():
+    """ Run the app normally """
     app = create_app(__get_config_file())
 
     # Check folder access
@@ -16,3 +18,6 @@ if __name__ == '__main__':
 
     app.debug = True
     app.run()
+
+if __name__ == '__main__':
+        run()
