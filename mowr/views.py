@@ -1,20 +1,30 @@
 import os
 from hashlib import sha256
 from shutil import move
-from flask import render_template, request, redirect, abort, url_for
+from flask import render_template, request, redirect, abort, url_for, flash
+from werkzeug.utils import secure_filename
 from mowr import app, mongo
 from mowr.analyser import Analyser
 
+def errorUpload():
+    flash('There was an error while uploading the file. Please try with a different file.', 'danger')
+    return redirect(url_for('index'))
+
 @app.route('/upload', methods=['POST'])
 def upload():
-    # TODO check file length + request.files content (empty etc)
-    file = request.files['file']
+    # Check file param
+    file = request.files.get('file')
+    if file is None:
+        return errorUpload()
+
+    # Check size (I think Flask is doing this by itself, but we never know...)
+    if request.content_length >= app.config['MAX_CONTENT_LENGTH']:
+        abort(413)
 
     # Check filename
-    path = os.path.join(app.config['TMP_FOLDER'], file.filename)
+    path = os.path.join(app.config['TMP_FOLDER'], secure_filename(file.filename))
     if os.path.isdir(path):
-        #TODO add flash error
-        return redirect(url_for('index'))
+        return errorUpload()
 
     # Save the file
     file.save(path)
