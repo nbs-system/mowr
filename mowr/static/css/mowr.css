@@ -15,3 +15,8 @@ body {
 .center {
     text-align: center;
 }
+
+.clean {
+    color: green;
+    font-weight: bold;
+}
