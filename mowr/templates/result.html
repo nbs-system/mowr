@@ -2,7 +2,8 @@
 {% block content %}
     Scan result:
     <table class="table table-bordered">
-        <tr><td colspan="2" class="active">File hashes</td></tr>
+        <tr><td colspan="2" class="active">File informations</td></tr>
+        <tr><td>Name(s)</td><td>{% for i in file['name'] %}{{ i }} {% endfor %}</td></tr>
         <tr><td>MD5</td><td>{{ file['md5'] }}</td></tr>
         <tr><td>Sha256</td><td>{{ file['sha256'] }}</td></tr>
         <tr><td>SSDeep</td><td>{{ file['ssdeep'] }}</td></tr>

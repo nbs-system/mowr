@@ -48,13 +48,14 @@ def upload():
     chmod(newfile, 0400)
 
     # Then analyse it and show results
-    analyser = Analyser(newfile)
+    analyser = Analyser(newfile, filename=file.filename)
     id = analyser.analyse()
     return redirect(url_for('default.file', id=id, action='analysis'))
 
 
 @default.route('/file/<sha>')
 def checkfile(sha):
+    """ Returns the id of the file's sha256 """
     f = current_app.mongo.db.files.find_one({"sha256": sha})
     if f is not None:
         return str(f["_id"])

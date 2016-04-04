@@ -11,6 +11,7 @@ function hashFile() {
                 $("#dropzone").submit();
             } else {
                 // Do not upload the file
+                // TODO Post file name too...
                 window.location.replace('/file/' + result + '/choose')
             }
         }})

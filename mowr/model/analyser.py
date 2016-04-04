@@ -7,9 +7,10 @@ from flask import abort, current_app, flash
 from os import access, R_OK
 
 class Analyser():
-    def __init__(self, file=None, id=None):
+    def __init__(self, file=None, id=None, filename=''):
         self.id = id
         self.file = file
+        self.filename = filename
         # Check if id is valid
         if id is not None:
             try:
@@ -49,10 +50,14 @@ class Analyser():
         # Format it (I could have called awk too)
         analysis = ' '.join([v for i, v in list(enumerate(analysis.split())) if i%2 == 0])
 
+        # Max length is 50
+        filename = self.filename[:50]
+
         # Store the result into the database
         if self.id is None:
             data = {"first_analysis": datetime.utcnow().ctime(),
                     "last_analysis": datetime.utcnow().ctime(),
+                    "name": [filename],
                     "md5": md5sum,
                     "sha256": sha256sum,
                     "ssdeep": ssdeephash,
@@ -65,7 +70,7 @@ class Analyser():
                     "sha256": sha256sum,
                     "ssdeep": ssdeephash,
                     "pmf_analysis": analysis}
-            current_app.mongo.db.files.update_one({"_id": ObjectId(self.id)}, {"$set": data})
+            current_app.mongo.db.files.update_one({"_id": ObjectId(self.id)}, {"$set": data, "$addToSet": {"name": filename}})
 
         return self.id
 
