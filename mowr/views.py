@@ -5,22 +5,18 @@ from flask import render_template, request, redirect, abort, url_for
 from mowr import app, mongo
 from mowr.analyser import Analyser
 
-# Routes
 @app.route('/upload', methods=['POST'])
 def upload():
-    # Save file in temp folder
+    # TODO check file length + request.files content (empty etc)
     file = request.files['file']
 
-    #TODO check file length + request.files content (empty etc)
-    #TODO Add tags for pmf answer (+bootstrap)
-    #TODO hash cote client
-
-    # Check user input
+    # Check filename
     path = os.path.join(app.config['TMP_FOLDER'], file.filename)
     if os.path.isdir(path):
         #TODO add flash error
         return redirect(url_for('index'))
 
+    # Save the file
     file.save(path)
     file = path
 
@@ -30,7 +26,7 @@ def upload():
     sha256sum = sha256(buf).hexdigest()
     f = mongo.db.files.find_one({"sha256": sha256sum})
 
-    # If already exists, delete the old one and ask what to do
+    # If already exists, delete the uploaded file and ask what to do
     if f is not None:
         id = f["_id"]
         os.remove(file)
@@ -46,6 +42,14 @@ def upload():
     return redirect(url_for('file', id=id, action='analysis'))
 
 
+@app.route('/file/<sha>')
+def checkfile(sha):
+    f = mongo.db.files.find_one({"sha256": sha})
+    if f is not None:
+        return str(f["_id"])
+    else:
+        return "NOK"
+
 @app.route('/file/<id>/<action>', methods=['GET', 'POST'])
 def file(id, action):
     # Init analyser to check the id
@@ -55,6 +59,7 @@ def file(id, action):
     if action == 'choose':
         return render_template('choose.html', id=id)
     elif action == 'analysis':
+        # TODO Add tags for pmf answer (+bootstrap)
         f = analyser.getInfos()
         return render_template('result.html', file=f)
     elif action == 'reanalyse':
