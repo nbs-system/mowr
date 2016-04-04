@@ -72,7 +72,7 @@ def file(id, action):
     elif action == 'reanalyse':
         analyser.analyse()
         f = analyser.getInfos()
-        return render_template('result.html', file=f)
+        return render_template('result.html', file=f, formatTag=formatTag)
     else:
         abort(404)
 
