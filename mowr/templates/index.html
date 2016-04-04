@@ -18,7 +18,7 @@
         <input onclick="hashFile()" type="submit" value="Upload" class="btn btn-info">
         -->
 
-    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="dropzone" id="dropzone">
+    <form action="{{ url_for('default.upload') }}" method="post" enctype="multipart/form-data" class="dropzone" id="dropzone">
         <input type="file" name="file" class="btn-input" id="dropzone-file">
         <input onclick="hashFile()" type="button" value="Upload" class="btn btn-info">
     </form>

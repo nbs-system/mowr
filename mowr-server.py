@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
-from mowr import app
+from mowr import create_app
 import os
 
+def __get_config_file():
+    return os.path.join(os.path.dirname(os.path.abspath(__name__)), 'config.cfg')
+
 if __name__ == '__main__':
+    app = create_app(__get_config_file())
+
     # Check folder access
     if not os.access(app.config['TMP_FOLDER'], os.W_OK) or not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
         print("Either TMP_FOLDER or UPLOAD_FOLDER is not writable. Please update the configuration.")
         exit(1)
-
-    import mowr.views
 
     app.debug = True
     app.run()
