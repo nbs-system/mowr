@@ -3,7 +3,8 @@ from datetime import datetime
 from hashlib import sha256, md5
 import ssdeep
 from bson.objectid import ObjectId, InvalidId
-from flask import abort, current_app
+from flask import abort, current_app, flash
+from os import access, R_OK
 
 class Analyser():
     def __init__(self, file=None, id=None):
@@ -27,6 +28,11 @@ class Analyser():
 
     def analyse(self):
         """ Returns the file _id """
+        # Make sure the file exists and is readable
+        if not access(self.file, R_OK):
+            flash('There was an error while trying to analyse the file.', 'danger')
+            return -1
+
         # Compute hashes
         with open(self.file, 'rb') as f:
             buf = f.read()

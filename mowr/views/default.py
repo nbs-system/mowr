@@ -1,9 +1,6 @@
-import os
 from hashlib import sha256
-from shutil import move
 
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app
-from werkzeug.utils import secure_filename
 
 from model.analyser import Analyser
 
@@ -24,30 +21,20 @@ def upload():
     if request.content_length >= current_app.config['MAX_CONTENT_LENGTH']:
         abort(413)
 
-    # Check filename
-    path = os.path.join(current_app.config['TMP_FOLDER'], secure_filename(file.filename))
-    if os.path.isdir(path):
-        return errorUpload()
-
-    # Save the file
-    file.save(path)
-    file = path
-
     # Check the file sha256 and if it already exists
-    with open(file, 'rb') as f:
-        buf = f.read()
-    sha256sum = sha256(buf).hexdigest()
+    sha256sum = sha256(file.stream.read()).hexdigest()
     f = current_app.mongo.db.files.find_one({"sha256": sha256sum})
 
-    # If already exists, delete the uploaded file and ask what to do
+    # If already exists ask what to do
     if f is not None:
         id = f["_id"]
-        os.remove(file)
         return redirect(url_for('default.file', id=id, action='choose'))
 
-    # If it is the first time, save the file to the correct location and delete the old one
+    # If it is the first time, save the file to the correct location
     newfile = Analyser.getFilePath(sha256sum)
-    move(file, newfile)
+    # Seek is needed because of the above file.stream.read()
+    file.stream.seek(0)
+    file.save(newfile)
 
     # Then analyse it and show results
     analyser = Analyser(newfile)

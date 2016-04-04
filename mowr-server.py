@@ -10,7 +10,7 @@ if __name__ == '__main__':
     app = create_app(__get_config_file())
 
     # Check folder access
-    if not os.access(app.config['TMP_FOLDER'], os.W_OK) or not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
+    if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
         print("Either TMP_FOLDER or UPLOAD_FOLDER is not writable. Please update the configuration.")
         exit(1)
 
