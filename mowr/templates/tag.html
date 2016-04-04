@@ -3,7 +3,7 @@
     Scan result:
     <table class="table table-bordered">
     {% for file in files %}
-        <tr><td>{{ file['sha256'] }}</td><td>
+        <tr><td><a href="{{ url_for('default.file', id=file["_id"], action='analysis') }}">{{ file['sha256'] }}</a></td><td>
             {% for i in file['pmf_analysis'].split() %}
                 {{ formatTag('pmf', i)|safe }}
             {% endfor %}
