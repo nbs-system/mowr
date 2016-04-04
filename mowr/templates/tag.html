@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+    Scan result:
+    <table class="table table-bordered">
+    {% for file in files %}
+        <tr><td>{{ file['sha256'] }}</td><td>
+            {% for i in file['pmf_analysis'].split() %}
+                {{ formatTag('pmf', i)|safe }}
+            {% endfor %}
+        </td></tr>
+    {% endfor %}
+    </table>
+
+    <a href="{{ url_for('default.index') }}"><span class="btn btn-info">Upload a new file</span></a>
+{% endblock %}

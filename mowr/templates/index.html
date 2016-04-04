@@ -1,28 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="center">
-        <div class="container">
-            <div class="container">
-                <h2>Welcome on MOWR !</h2>
-                <h5>More Obvious Web-malware Repository</h5>
-            </div>
-        </div>
-
-        <!--
-        <form id="upload" action="" method="get" enctype="multipart/form-data">
-            <input type="file" name="file" class="btn btn-default btn-input">
-            <input onclick="hashFile()" type="submit" value="Upload" class="btn btn-info">
-        </form>
-        -->
-        <!--<input id="upload" type="file" name="file" class="btn btn-default btn-input">
-        <input onclick="hashFile()" type="submit" value="Upload" class="btn btn-info">
-        -->
-
+    <h2>Welcome on MOWR !</h2>
+    <h5>More Obvious Web-malware Repository</h5>
     <form action="{{ url_for('default.upload') }}" method="post" enctype="multipart/form-data" class="dropzone" id="dropzone">
         <input type="file" name="file" class="btn-input" id="dropzone-file">
         <input onclick="hashFile()" type="button" value="Upload" class="btn btn-info">
     </form>
-
     </div>
 {% endblock %}
 

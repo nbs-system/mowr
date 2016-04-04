@@ -12,7 +12,11 @@
         <tr><td>Last analysis</td><td>{{ file['last_analysis'] }}</td></tr>
 
         <tr><td colspan="2" class="active">File analysis</td></tr>
-        <tr><td>PMF</td><td>{{ file['pmf_analysis'] }}</td></tr>
+        <tr><td>PMF</td><td>
+            {% for i in file['pmf_analysis'].split() %}
+                {{ formatTag('pmf', i)|safe }}
+            {% endfor %}
+        </td></tr>
     </table>
 
     <a href="{{ url_for('default.index') }}"><span class="btn btn-info">Upload a new file</span></a>
