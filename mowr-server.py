@@ -12,7 +12,7 @@ def run():
 
     # Check folder access
     if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
-        print("UPLOAD_FOLDER is not writable. Please update the configuration.")
+        print("%s is not writable. Please update the configuration (UPLOAD_FOLDER)." % app.config['UPLOAD_FOLDER'])
         exit(1)
 
     app.threaded = True

@@ -1,5 +1,6 @@
 from mowr import create_app
 import unittest
+import six
 
 class DefaultTestCase(unittest.TestCase):
     def setUp(self):
@@ -7,7 +8,10 @@ class DefaultTestCase(unittest.TestCase):
         self.app = app.test_client()
 
     def test_checkfile(self):
-        self.assertEqual(self.app.get('/file/NON-EXISTANT_SHA').data, 'NOK')
+        if six.PY2:
+            self.assertEqual(self.app.get('/file/NON-EXISTANT_SHA').data, 'NOK')
+        else:
+            self.assertEqual(self.app.get('/file/NON-EXISTANT_SHA').data, b'NOK')
 
 if __name__ == '__main__':
     unittest.main()
