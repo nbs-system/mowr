@@ -9,12 +9,6 @@ def __get_config_file():
 def run():
     """ Run the app normally """
     app = create_app(__get_config_file())
-
-    # Check folder access
-    if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
-        print("%s is not writable. Please update the configuration (UPLOAD_FOLDER)." % app.config['UPLOAD_FOLDER'])
-        exit(1)
-
     app.threaded = True
     app.debug = True
     app.run()

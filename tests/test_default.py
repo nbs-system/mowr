@@ -6,9 +6,6 @@ from io import BytesIO as StringIO
 class DefaultTestCase(unittest.TestCase):
     def setUp(self):
         app = create_app('../config.cfg')
-        # Useful for travis
-        if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
-            os.mkdir(app.config['UPLOAD_FOLDER'])
         self.app = app.test_client()
 
     def test_upload(self):
