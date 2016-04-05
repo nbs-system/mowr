@@ -11,9 +11,6 @@ class DefaultTestCase(unittest.TestCase):
             os.mkdir(app.config['UPLOAD_FOLDER'])
         self.app = app.test_client()
 
-    def test_checkfile(self):
-        self.assertEqual(self.app.get('/file/NON-EXISTANT_SHA').data.decode('utf-8'), 'NOK')
-
     def test_upload(self):
         """ Test upload form """
         # Upload without any file
@@ -32,8 +29,8 @@ class DefaultTestCase(unittest.TestCase):
         rv = self.app.post('/upload', data=dict(
             file=(StringIO(file_content), file_name),
             filename=file_name
-        ), follow_redirects=True).data.decode('utf-8')
-        self.assertTrue(file_name in rv)
+        ), follow_redirects=True)
+        self.assertTrue(file_name in rv.data.decode('utf-8'))
 
         # Upload the same file and check redirection
         rv = self.app.post('/upload', data=dict(
@@ -41,6 +38,9 @@ class DefaultTestCase(unittest.TestCase):
             filename=file_name
         ), follow_redirects=True).data.decode('utf-8')
         self.assertTrue('This file has already been analysed.' in rv)
+
+    def test_checkfile(self):
+        self.assertEqual(self.app.get('/file/NON-EXISTANT_SHA').data.decode('utf-8'), 'NOK')
 
 if __name__ == '__main__':
     unittest.main()
