@@ -81,6 +81,8 @@ class Analyser():
         return current_app.mongo.db.files.find_one_or_404({"_id": ObjectId(self.id)})
 
     def addName(self, filename):
+        if filename is None:
+            return
         # Check the filename is valid otherwise it's junk
         filename = filename[:50]
         if any(x in filename for x in ['/', '\\', '..', ';', ',']):

@@ -71,9 +71,9 @@ def file(id, action):
     analyser = Analyser(None, id)
 
     # Handle action
-    if action == 'choose' and request.method == 'POST':
+    if action == 'choose':
         # Save filename
-        analyser.addName(request.form["filename"])
+        analyser.addName(request.form.get("filename"))
         return render_template('choose.html', id=id)
     elif action == 'analysis':
         f = analyser.getInfos()
