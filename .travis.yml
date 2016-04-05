@@ -4,7 +4,7 @@ python:
   - "2.7"
   - "3.5"
 
-script:
-  - pip install -r requirements.txt
-  - pip install nose2
-  - nose2
+env: BUILD_LIB=1
+install: "pip install -r requirements.txt"
+services: mongodb
+script: nosetests

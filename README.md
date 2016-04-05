@@ -1,5 +1,7 @@
-# MOWR
-More Obvious Web-malware Repository
+# MOWR - More Obvious Web-malware Repository
+[![Build Status](https://travis-ci.com/xarkes/mowr.svg?token=9Xzgra6ppqzjTnDcac9B&branch=master)](https://travis-ci.com/xarkes/mowr/)
+
+
 This web interface is a virus-total like aiming at scanning web shells/malwares/etc.
 
 ## Database
