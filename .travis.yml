@@ -4,9 +4,13 @@ python:
   - "2.7"
   - "3.5"
 
+git:
+  depth: 1
+
 env: BUILD_LIB=1
-install:
-  - "pip install -r requirements.txt"
-  - "git clone https://github.com/nbs-system/php-malware-finder"
+
+install: "pip install -r requirements.txt"
+
 services: mongodb
+
 script: nosetests

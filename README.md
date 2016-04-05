@@ -5,12 +5,11 @@ Mowr is a [virustotal]( https://www.virustotal.com/ )-like web application aimin
 
 # Usage
 This application uses [MongoDB]( https://www.mongodb.org/ ), if you do not already have it, please download and install it.
-Also it uses [PMF](https://github.com/nbs-system/php-malware-finder) so you will need to clone it.
+Also it uses [PMF](https://github.com/nbs-system/php-malware-finder) so you will need to clone it with the project.
 ```
-git clone https://github.com/xarkes/mowr
+git clone https://github.com/xarkes/mowr --depth 1
 cd mowr
 pip install -r requirements.txt
-git clone https://github.com/nbs-system/php-malware-finder
 python mowr-server.py
 ```
 

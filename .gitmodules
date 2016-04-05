@@ -1,0 +1,3 @@
+[submodule "php-malware-finder"]
+	path = php-malware-finder
+	url = https://github.com/nbs-system/php-malware-finder
