@@ -43,8 +43,7 @@ class Analyser():
         ssdeephash = ssdeep.hash(buf)
 
         # Start the analysis
-        # TODO yara bindings
-        # TODO add tests
+        # TODO yara bindings ?
         analysis = subprocess.check_output(
                 [current_app.config['PMF_BIN'], self.file]
                 )
@@ -80,4 +79,13 @@ class Analyser():
     def getInfos(self):
         """ Get current analysis informations """
         return current_app.mongo.db.files.find_one_or_404({"_id": ObjectId(self.id)})
+
+    def addName(self, filename):
+        # Check the filename is valid otherwise it's junk
+        filename = filename[:50]
+        if any(x in filename for x in ['/', '\\', '..', ';', ',']):
+            return
+
+        # Insert it into the database
+        current_app.mongo.db.files.update_one({"_id": ObjectId(self.id)}, {"$addToSet": {"name": filename}})
 

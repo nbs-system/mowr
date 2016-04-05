@@ -71,7 +71,9 @@ def file(id, action):
     analyser = Analyser(None, id)
 
     # Handle action
-    if action == 'choose':
+    if action == 'choose' and request.method == 'POST':
+        # Save filename
+        analyser.addName(request.form["filename"])
         return render_template('choose.html', id=id)
     elif action == 'analysis':
         f = analyser.getInfos()
@@ -80,8 +82,7 @@ def file(id, action):
         analyser.analyse()
         f = analyser.getInfos()
         return render_template('result.html', file=f, formatTag=formatTag)
-    else:
-        abort(404)
+    abort(404)
 
 @default.route('/tag/<soft>/<tag>')
 def tag(soft, tag):
