@@ -28,7 +28,7 @@ def upload():
 
     # Check file mime type from file stream and not from request content
     file_content = file.stream.read()
-    mime = magic.from_buffer(file_content, mime=True)
+    mime = magic.from_buffer(file_content, mime=True).decode('utf-8')
     if mime not in current_app.config['ALLOWED_MIME']:
         flash('Sorry, this file type is not allowed. Please try with another one.', 'warning')
         return redirect(url_for('default.index'))
