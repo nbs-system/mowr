@@ -9,6 +9,7 @@ Also it uses [PMF](https://github.com/nbs-system/php-malware-finder) so you will
 ```
 git clone https://github.com/xarkes/mowr
 cd mowr
+pip install -r requirements.txt
 git clone https://github.com/nbs-system/php-malware-finder
 python mowr-server.py
 ```
