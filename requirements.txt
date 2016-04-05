@@ -1,3 +1,4 @@
 ssdeep
 Flask
 Flask-PyMongo
+python-magic

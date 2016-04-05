@@ -3,6 +3,7 @@ from flask import render_template, request, redirect, abort, url_for, flash, Blu
 from mowr.model.analyser import Analyser
 from random import choice
 from os import chmod
+import magic
 
 default = Blueprint('default', __name__)
 
@@ -25,13 +26,15 @@ def upload():
     if request.content_length >= current_app.config['MAX_CONTENT_LENGTH']:
         abort(413)
 
-    # Check file mime type
-    if file.content_type not in current_app.config['ALLOWED_MIME']:
+    # Check file mime type from file stream and not from request content
+    file_content = file.stream.read()
+    mime = magic.from_buffer(file_content, mime=True)
+    if mime not in current_app.config['ALLOWED_MIME']:
         flash('Sorry, this file type is not allowed. Please try with another one.', 'warning')
         return redirect(url_for('default.index'))
 
     # Check the file sha256 and if it already exists
-    sha256sum = sha256(file.stream.read()).hexdigest()
+    sha256sum = sha256(file_content).hexdigest()
     f = current_app.mongo.db.files.find_one({"sha256": sha256sum})
 
     # If already exists ask what to do
