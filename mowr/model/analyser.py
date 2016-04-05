@@ -5,6 +5,7 @@ import ssdeep
 from bson.objectid import ObjectId, InvalidId
 from flask import abort, current_app, flash
 from os import access, R_OK
+import six
 
 class Analyser():
     def __init__(self, file=None, id=None, filename=''):
@@ -47,8 +48,10 @@ class Analyser():
         analysis = subprocess.check_output(
                 [current_app.config['PMF_BIN'], self.file]
                 )
-        # Format it (I could have called awk too)
-        analysis = ' '.join([v for i, v in list(enumerate(analysis.split())) if i%2 == 0])
+        if six.PY2:
+            analysis = [v for i, v in list(enumerate(analysis.split())) if i%2 == 0]
+        else:
+            analysis = [v for i, v in enumerate(analysis.decode('utf-8').split()) if i%2 == 0]
 
         # Max length is 50
         filename = self.filename[:50]

@@ -17,7 +17,7 @@
         {% if file['pmf_analysis']|length == 0 %}
             <div class="clean">Clean <span class="glyphicon glyphicon-ok-sign"></span></div>
         {% else %}
-            {% for i in file['pmf_analysis'].split() %}
+            {% for i in file['pmf_analysis'] %}
                 {{ formatTag('pmf', i)|safe }}
             {% endfor %}
         {% endif %}

@@ -12,9 +12,10 @@ def run():
 
     # Check folder access
     if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
-        print("Either TMP_FOLDER or UPLOAD_FOLDER is not writable. Please update the configuration.")
+        print("UPLOAD_FOLDER is not writable. Please update the configuration.")
         exit(1)
 
+    app.threaded = True
     app.debug = True
     app.run()
 

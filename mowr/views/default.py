@@ -45,7 +45,7 @@ def upload():
     file.stream.seek(0)
     file.save(newfile)
     # Chmod the file to prevent it from being executed
-    chmod(newfile, 0400)
+    chmod(newfile, 0o400)
 
     # Then analyse it and show results
     analyser = Analyser(newfile, filename=file.filename)
