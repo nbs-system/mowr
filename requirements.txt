@@ -1,4 +1,4 @@
 ssdeep
-Flask
-Flask-PyMongo
 python-magic
+Flask
+Flask-MongoEngine

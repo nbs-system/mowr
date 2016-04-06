@@ -34,7 +34,7 @@ function hashFile() {
                 $("#dropzone").submit();
             } else {
                 // Do not upload the file but post filename
-                redirect_by_post('/file/' + result + '/choose', {filename: filename}, false)
+                redirect_by_post('/file/' + sha256 + '/choose', {filename: filename}, false)
             }
         }})
     };

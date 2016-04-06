@@ -1,18 +1,22 @@
 from hashlib import sha256
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app
 from mowr.model.analyser import Analyser
+from mowr.model.db import Sample
 from random import choice
 from os import chmod
 import magic
 
 default = Blueprint('default', __name__)
 
+
 # TODO
 def tagnameToColor(tag):
     return choice(['primary', 'danger', 'success', 'default', 'warning'])
 
+
 def formatTag(soft, tag):
     return '<a class="label label-' + tagnameToColor(tag) + '" href="' + url_for('default.tag', soft=soft, tag=tag) + '">' + tag +'</a>'
+
 
 @default.route('/upload', methods=['POST'])
 def upload():
@@ -35,15 +39,14 @@ def upload():
 
     # Check the file sha256 and if it already exists
     sha256sum = sha256(file_content).hexdigest()
-    f = current_app.mongo.db.files.find_one({"sha256": sha256sum})
+    f = Sample.objects(sha256=sha256sum).first()
 
     # If already exists ask what to do
     if f is not None:
-        id = f["_id"]
-        return redirect(url_for('default.file', id=id, action='choose'))
+        return redirect(url_for('default.file', sha256=sha256sum, action='choose'))
 
     # If it is the first time, save the file to the correct location
-    newfile = Analyser.getFilePath(sha256sum)
+    newfile = Analyser.getfilepath(sha256sum)
     # Seek is needed because of the above file.stream.read()
     file.stream.seek(0)
     file.save(newfile)
@@ -51,38 +54,38 @@ def upload():
     chmod(newfile, 0o400)
 
     # Then analyse it and show results
-    analyser = Analyser(newfile, filename=file.filename)
-    id = analyser.analyse()
-    return redirect(url_for('default.file', id=id, action='analysis'))
+    analyser = Analyser(sha256=sha256sum, filename=file.filename)
+    analyser.analyse()
+    return redirect(url_for('default.file', sha256=sha256sum, action='analysis'))
 
 
-@default.route('/file/<sha>')
-def checkfile(sha):
-    """ Returns the id of the file's sha256 """
-    f = current_app.mongo.db.files.find_one({"sha256": sha})
-    if f is not None:
-        return str(f["_id"])
-    else:
-        return "NOK"
+@default.route('/file/<sha256>')
+def checkfile(sha256):
+    """ Returns OK if the file exists """
+    if len(Sample.objects(sha256=sha256)) == 1:
+        return "OK"
+    return "NOK"
 
-@default.route('/file/<id>/<action>', methods=['GET', 'POST'])
-def file(id, action):
+
+@default.route('/file/<sha256>/<action>', methods=['GET', 'POST'])
+def file(sha256, action):
     # Init analyser to check the id
-    analyser = Analyser(None, id)
+    analyser = Analyser(sha256=sha256)
 
     # Handle action
     if action == 'choose':
         # Save filename
-        analyser.addName(request.form.get("filename"))
-        return render_template('choose.html', id=id)
+        analyser.addname(request.form.get("filename"))
+        return render_template('choose.html', sha256=sha256)
     elif action == 'analysis':
-        f = analyser.getInfos()
+        f = analyser.getsample()
         return render_template('result.html', file=f, formatTag=formatTag)
     elif action == 'reanalyse':
         analyser.analyse()
-        f = analyser.getInfos()
+        f = analyser.getsample()
         return render_template('result.html', file=f, formatTag=formatTag)
     abort(404)
+
 
 @default.route('/tag/<soft>/<tag>')
 def tag(soft, tag):
@@ -92,15 +95,14 @@ def tag(soft, tag):
     else:
         abort(404)
 
+
 @default.route('/')
 def index():
     return render_template('index.html')
+
 
 # Error handlers
 @default.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
-#@default.errorhandler(500)
-#def page_not_found(e):
-#    return render_template('500.html'), 500

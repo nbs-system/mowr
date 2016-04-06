@@ -7,9 +7,15 @@ python:
 git:
   depth: 1
 
-env: BUILD_LIB=1
+cache:
+  - pip
 
-install: "pip install -r requirements.txt"
+env:
+  - BUILD_LIB=1 PATH=$PATH:$(pwd)/yara
+
+install: 
+  - "pip install -r requirements.txt"
+  - "git clone https://github.com/plusvic/yara && cd ./yara && ./bootstrap.sh && ./configure && make"
 
 services: mongodb
 

@@ -2,8 +2,8 @@
 {% block content %}
     <div class="center">
     <p>This file has already been analysed.</p>
-    <a href="{{ url_for('default.file', id=id, action='reanalyse') }}"><span class="btn btn-warning">Reanalyse</span></a>
-    <a href="{{ url_for('default.file', id=id, action='analysis') }}"><span class="btn btn-info">View last analysis</span></a>
+    <a href="{{ url_for('default.file', sha256=sha256, action='reanalyse') }}"><span class="btn btn-warning">Reanalyse</span></a>
+    <a href="{{ url_for('default.file', sha256=sha256, action='analysis') }}"><span class="btn btn-info">View last analysis</span></a>
     </div>
 {% endblock %}
 
