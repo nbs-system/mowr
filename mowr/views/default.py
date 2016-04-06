@@ -62,7 +62,7 @@ def upload():
 @default.route('/file/<sha256>')
 def checkfile(sha256):
     """ Returns OK if the file exists """
-    if len(Sample.objects(sha256=sha256)) == 1:
+    if Sample.objects(sha256=sha256).first() is not None:
         return "OK"
     return "NOK"
 

@@ -5,7 +5,6 @@ import ssdeep
 from flask import current_app, flash
 from os import access, R_OK
 from mowr.model.db import Sample
-import six
 
 
 class Analyser():
