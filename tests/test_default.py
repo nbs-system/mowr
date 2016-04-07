@@ -12,9 +12,10 @@ class DefaultTestCase(unittest.TestCase):
         # Clean database if already exists
         Sample.drop_collection()
         # Remove files from test folder
-        for file in os.listdir(app.config['UPLOAD_FOLDER']):
+        for f in os.listdir(app.config['UPLOAD_FOLDER']):
             # Dont delete any file, just sha256 looking one (in cas of configuration mistake)
-            if len(file) == 64: os.remove('{0}/{1}'.format(app.config['UPLOAD_FOLDER'], file))
+            if len(f) == 64:
+                os.remove('{0}/{1}'.format(app.config['UPLOAD_FOLDER'], f))
 
 
     def test_upload(self):

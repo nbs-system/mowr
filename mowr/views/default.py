@@ -15,7 +15,7 @@ def tagnameToColor(tag):
 
 
 def formatTag(soft, tag):
-    return '<a class="label label-' + tagnameToColor(tag) + '" href="' + url_for('default.tag', soft=soft, tag=tag) + '">' + tag +'</a>'
+    return '<a class="label label-' + tagnameToColor(tag) + '" href="' + url_for('default.tag', soft=soft, tag=tag) + '">' + tag + '</a>'
 
 
 @default.route('/upload', methods=['POST'])

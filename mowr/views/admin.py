@@ -6,7 +6,7 @@ admin = Blueprint('admin', __name__, url_prefix='/admin')
 
 @admin.route('/')
 def index():
-    if not 'login' in session:
+    if 'login' not in session:
         return redirect(url_for('admin.login'))
     elif session.get('login') == current_app.config['ADMIN_LOGIN']:
         return render_template('admin.html', stats=getstats())
@@ -20,9 +20,10 @@ def login():
 
     if request.method == 'POST':
         # Check input
-        if request.form.get('password') == current_app.config['ADMIN_PASSWORD'] and request.form.get('login') == current_app.config['ADMIN_LOGIN']:
-            session['login'] = request.form.get('login')
-            return redirect(url_for('admin.index'))
+        if request.form.get('password') == current_app.config['ADMIN_PASSWORD']:
+            if request.form.get('login') == current_app.config['ADMIN_LOGIN']:
+                session['login'] = request.form.get('login')
+                return redirect(url_for('admin.index'))
         else:
             flash('Sorry, are you sure about what you are doing ?', 'danger')
 

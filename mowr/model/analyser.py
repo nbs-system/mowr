@@ -8,7 +8,7 @@ from mowr.model.db import Sample
 from werkzeug.utils import secure_filename
 
 
-class Analyser():
+class Analyser:
     def __init__(self, sha256, filename=''):
         self.sha256 = sha256
         self.filename = secure_filename(filename)
@@ -24,7 +24,7 @@ class Analyser():
         # Make sure the file exists and is readable
         if not access(self.file, R_OK):
             flash('There was an error while trying to analyse the file.', 'danger')
-            return -1
+            return False
 
         # Compute hashes
         with open(self.file, 'rb') as f:
@@ -65,7 +65,7 @@ class Analyser():
             
         # Allow the user to vote for his sample
         session['can_vote'] = sha256sum
-        return 0
+        return True
 
     def getsample(self):
         """ Return the Sample object (database row) """
