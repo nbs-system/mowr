@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Custom CSS -->
+        <link href="/static/css/mowr.css" rel="stylesheet">
+        <title>MOWR - Not Found</title>
+    </head>
+
+    <body class="error">
+    <p class="error_nb">{{ num }}</p>
+    {% if num == 404 %}
+        <p>Sorry, this page could not be found.</p>
+    {% elif num == 500 %}
+        <p>Sorry, there was an error while processing your request.</p>
+    {% else %}
+        <p>Oops ! Something went wrong.</p>
+    {% endif %}
+    <p><a href="{{ url_for('default.index') }}">Go back home</a></p>
+    </body>
+</html>
+

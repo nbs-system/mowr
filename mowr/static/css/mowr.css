@@ -20,3 +20,17 @@ body {
     color: green;
     font-weight: bold;
 }
+
+.error {
+    padding-top: 20px;
+    text-align: center;
+    background-color: #e7e7e7;
+}
+
+.error_nb {
+    font-size: 48px;
+}
+
+.error a, .error a:visited {
+    color: #245269;
+}

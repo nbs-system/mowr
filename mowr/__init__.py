@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_mongoengine import MongoEngine
 import base64
 import os
@@ -32,5 +32,14 @@ def create_app(config_filename=''):
     from mowr.views import admin
     app.register_blueprint(default.default)
     app.register_blueprint(admin.admin)
+
+    # Error handlers
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('error.html', num=404), 404
+
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        return render_template('error.html', num=500), 500
 
     return app
