@@ -45,3 +45,19 @@ function hashFile() {
 
     reader.readAsBinaryString(file)
 }
+
+function vote(sha256, type) {
+    var vote_div = $("#vote");
+    var buttons = vote_div.find("button");
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].disabled = "disabled";
+    }
+
+    $.ajax({url: "/vote/" + sha256 + "/" + type, success: function(result) {
+        if (result === "OK") {
+            // Replace the vote div
+            vote_div.replaceWith('<div class="alert alert-success alert-small">Thank you for voting !</div>');
+        }
+    }})
+}
+

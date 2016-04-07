@@ -2,15 +2,16 @@ import subprocess
 from datetime import datetime
 from hashlib import sha256, md5
 import ssdeep
-from flask import current_app, flash
+from flask import current_app, flash, session
 from os import access, R_OK
 from mowr.model.db import Sample
+from werkzeug.utils import secure_filename
 
 
 class Analyser():
     def __init__(self, sha256, filename=''):
         self.sha256 = sha256
-        self.filename = filename
+        self.filename = secure_filename(filename)
         self.file = self.getfilepath(self.sha256)
 
     @staticmethod
@@ -48,7 +49,9 @@ class Analyser():
                 md5=md5sum,
                 sha256=sha256sum,
                 ssdeep=ssdeephash,
-                pmf_analysis=analysis
+                pmf_analysis=analysis,
+                vote_clean=0,
+                vote_malicious=0
             ).save()
         else:
             Sample.objects(sha256=self.sha256).first().update(
@@ -59,6 +62,9 @@ class Analyser():
                 pmf_analysis=analysis,
                 add_to_set__name=filename
             )
+            
+        # Allow the user to vote for his sample
+        session['can_vote'] = sha256sum
         return 0
 
     def getsample(self):

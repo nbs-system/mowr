@@ -24,6 +24,15 @@
         </td></tr>
     </table>
 
+    {% if session.get('can_vote') == file['sha256'] %}
+        <div class="alert" id="vote">
+        What do you think about this file ?
+        <button class="btn btn-success btn-xs" onclick="vote('{{ file['sha256'] }}', 'clean')">Clean</button>
+        <button class="btn btn-danger btn-xs" onclick="vote('{{ file['sha256'] }}', 'malicious')">Malicious</button>
+        </div>
+    {% endif %}
+    <div class="container">
     <a href="{{ url_for('default.index') }}"><span class="btn btn-info">Upload a new file</span></a>
+    </div>
 {% endblock %}
 

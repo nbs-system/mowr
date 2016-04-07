@@ -1,5 +1,5 @@
 from flask_mongoengine import Document
-from mongoengine import StringField, ListField
+from mongoengine import StringField, ListField, IntField
 
 
 class Sample(Document):
@@ -10,3 +10,5 @@ class Sample(Document):
     sha256 = StringField(max_length=64)
     ssdeep = StringField()
     pmf_analysis = ListField()
+    vote_clean = IntField()
+    vote_malicious = IntField()

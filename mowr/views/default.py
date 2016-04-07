@@ -1,5 +1,5 @@
 from hashlib import sha256
-from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app
+from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app, session
 from mowr.model.analyser import Analyser
 from mowr.model.db import Sample
 from random import choice
@@ -90,10 +90,23 @@ def file(sha256, action):
 @default.route('/tag/<soft>/<tag>')
 def tag(soft, tag):
     if soft == 'pmf':
-        l = current_app.mongo.db.files.find({"pmf_analysis": {"$regex": ".*" + tag + ".*"}}).limit(10)
+        l = Sample.objects(pmf_analysis=tag)
         return render_template('tag.html', files=l, formatTag=formatTag)
     else:
         abort(404)
+
+
+@default.route('/vote/<sha256>/<mode>')
+def vote(sha256, mode):
+    if session.get('can_vote') == sha256:
+        session.pop('can_vote', None)
+        if mode == 'clean':
+            Sample.objects(sha256=sha256).update(inc__vote_clean=1)
+            return "OK"
+        elif mode == 'malicious':
+            Sample.objects(sha256=sha256).update(inc__vote_malicious=1)
+            return "OK"
+    return "NOK"
 
 
 @default.route('/')
