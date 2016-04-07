@@ -28,7 +28,9 @@
 
                     <!-- Left nav -->
                     <ul class="nav navbar-nav">
-                    <li><a href="#">Waoh</a></li>
+                        {% if session.get('login') != None %}
+                        <li><a href="{{ url_for('admin.index') }}">Administration</a></li>
+                        {% endif %}
                     </ul>
                 </div><!--/.nav-collapse -->
             </div><!--/.container -->

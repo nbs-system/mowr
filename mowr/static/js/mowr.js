@@ -56,7 +56,7 @@ function vote(sha256, type) {
     $.ajax({url: "/vote/" + sha256 + "/" + type, success: function(result) {
         if (result === "OK") {
             // Replace the vote div
-            vote_div.replaceWith('<div class="alert alert-success alert-small">Thank you for voting !</div>');
+            vote_div.replaceWith('<div class="alert alert-success alert-small">Thank you !</div>');
         }
     }})
 }
