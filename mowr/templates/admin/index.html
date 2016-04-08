@@ -42,69 +42,7 @@
 <body class="nav-md">
 <div class="container body">
     <div class="main_container">
-        <div class="col-md-3 left_col">
-            <div class="left_col scroll-view">
-
-                <div class="navbar nav_title" style="border: 0;">
-                    <a href="{{ url_for('admin.index') }}" class="site_title"><span>MOWR</span></a>
-                </div>
-                <div class="clearfix"></div>
-                <!-- /menu prile quick info -->
-
-                <br/>
-
-                <!-- sidebar menu -->
-                <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-
-                    <div class="menu_section">
-                        <h3>General</h3>
-                        <ul class="nav side-menu">
-                            <li><a><i class="fa fa-home"></i> Dashboards <span class="fa fa-chevron-down"></span></a>
-                                <ul class="nav child_menu" style="display: none">
-                                    <li><a href="{{ url_for('admin.index') }}">Dashboard 1</a>
-                                    </li>
-                                    <li><a href="#">Dashboard 2</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <!-- /sidebar menu -->
-
-                <!-- /menu footer buttons -->
-                <div class="sidebar-footer hidden-small">
-                    <a data-toggle="tooltip" data-placement="top" title="Settings">
-                        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-                        <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="Lock">
-                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="Logout" href="{{ url_for('admin.logout') }}">
-                        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-                    </a>
-                </div>
-                <!-- /menu footer buttons -->
-            </div>
-        </div>
-
-        <!-- top navigation -->
-        <div class="top_nav">
-
-            <div class="nav_menu">
-                <nav class="" role="navigation">
-                    <div class="nav toggle">
-                        <a id="menu_toggle"><i class="fa fa-bars"></i></a>
-                    </div>
-                </nav>
-            </div>
-
-        </div>
-        <!-- /top navigation -->
-
+        {% include "admin/sidebar.html" %}
 
         <!-- page content -->
         <div class="right_col" role="main">
@@ -115,15 +53,21 @@
                     <div class="left"></div>
                     <div class="right">
                         <span class="count_top"><i class="fa fa-file"></i> Total Samples</span>
-                        <div class="count">{{ '{:,d}'.format(stats.get('samplesNb')) }}</div>
+                        <div class="count">{{ '{:,d}'.format(stats.get('samples').get('nb')) }}</div>
+                        <span class="count_bottom">All types</span>
                     </div>
                 </div>
                 <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
                     <div class="left"></div>
                     <div class="right">
-                        <span class="count_top"><i class="fa fa-clock-o"></i> None</span>
-                        <div class="count">0</div>
-                        <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>3% </i> From last Week</span>
+                        <span class="count_top"><i class="fa fa-file"></i> Malicious ratio</span>
+                        <canvas style="width: 94px; display: block; margin-left: -10px; margin-right: -30px;"
+                                id="gaugeClean"></canvas>
+                        <span class="count_bottom">
+                        <span id="gauge-text">{{ stats.get('samples').get('malicious') }}</span>
+                            <span id="goal-text"
+                                  style="margin-left: 62px;">{{ stats.get('samples').get('clean') }}</span>
+                            </span>
                     </div>
                 </div>
                 <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
@@ -283,6 +227,8 @@
 
 <script src="{{ url_for('admin.static', filename='js/bootstrap.min.js') }}"></script>
 
+<!-- gaugejs -->
+<script type="text/javascript" src="{{ url_for('admin.static', filename='js/gauge/gauge.min.js') }}"></script>
 <!-- daterangepicker -->
 <script type="text/javascript" src="{{ url_for('admin.static', filename='js/moment/moment.min.js') }}"></script>
 <script type="text/javascript"
@@ -317,6 +263,29 @@
 <script>
     var ctx;
     var data;
+
+    // Gauge
+    var opts = {
+        lines: 12, // The number of lines to draw
+        angle: 0, // The length of each line
+        lineWidth: 0.4, // The line thickness
+        pointer: {
+            length: 0.75, // The radius of the inner circle
+            strokeWidth: 0.042, // The rotation offset
+            color: '#1D212A' // Fill color
+        },
+        limitMax: 'false', // If true, the pointer will not go past the end of the gauge
+        colorStart: '#DF013A', // Colors
+        colorStop: '#DF013A', // just experiment with them
+        strokeColor: '#1ABC9C', // to see which ones work best for you
+        generateGradient: false
+    };
+    var target = document.getElementById('gaugeClean'); // your canvas element
+    var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+    gauge.maxValue = {{ stats.get('samples').get('nb') }}; // set max gauge value
+    gauge.animationSpeed = 32; // set animation speed (32 is default value)
+    gauge.set({{ stats.get('samples').get('malicious') }}); // set actual value
+    gauge.setTextField(document.getElementById("gauge-text"));
 
     // Main graph
     ctx = document.getElementById("samplesChart");
@@ -369,11 +338,11 @@
         datasets: [{
             data: {{ stats.get('fileType').get('stats') }},
             backgroundColor: [
-                "#455C73",
                 "#9B59B6",
                 "#BDC3C7",
                 "#26B99A",
-                "#3498DB"
+                "#3498DB",
+                "#455C73"
             ],
             label: 'File types' // for legend
         }],
@@ -387,6 +356,7 @@
             legend: true
         }
     });
+
 </script>
 </body>
 

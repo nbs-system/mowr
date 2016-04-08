@@ -38,11 +38,31 @@ def logout():
     return redirect(url_for('default.index'))
 
 
+@admin.route('/samples')
+def samples():
+    if 'login' not in session:
+        return redirect(url_for('admin.login'))
+    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
+        return render_template('admin/samples.html')
+    abort(404)
+
+
 def getstats():
     """ Returns a dict containing statistics """
-    ## Disk usage
+    ## Samples infos
     # Count samples in the database
     samplesNb = Sample.objects.count()
+    # Get clean and malicious files
+    clean = Sample.objects(pmf_analysis__size=0).count()
+    malicious = samplesNb - clean
+
+    samples = dict(
+        nb=samplesNb,
+        clean=clean,
+        malicious=malicious
+    )
+
+    ## Disk usage
     # Count the samples size
     file_size = sum(os.path.getsize('{0}/{1}'.format(current_app.config['UPLOAD_FOLDER'], f)) for f in
                     os.listdir(current_app.config['UPLOAD_FOLDER']))
@@ -84,7 +104,7 @@ def getstats():
     print(stats, types, rates)
 
     return dict(
-        samplesNb=samplesNb,
+        samples=samples,
         samplesChart=samplesChart,
         diskUsage=diskUsage,
         fileType=fileType
