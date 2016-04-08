@@ -57,22 +57,35 @@ def getstats():
 
     ## Graph 1
     # Last 7 days dates from oldest to newest
-    dateList = list(reversed([datetime.fromtimestamp(datetime.utcnow().timestamp() - 3600*24*i) for i in range(7)]))
+    dateList = list(reversed([datetime.fromtimestamp(datetime.utcnow().timestamp() - 3600 * 24 * i) for i in range(7)]))
     dateList = [i.replace(minute=0, hour=0, second=0, microsecond=0) for i in dateList]
     # Count the samples
     data1 = [Sample.objects(first_analysis__gte=dateList[i], first_analysis__lt=dateList[i + 1]).count() for i in
              range(len(dateList) - 1)]
-    data1.append(Sample.objects(first_analysis__gte=dateList[len(dateList)-1]).count())
+    data1.append(Sample.objects(first_analysis__gte=dateList[len(dateList) - 1]).count())
 
     samplesChart = dict(
         # Get only the year-day-month
         dateList=[i.date().isoformat() for i in dateList],
         data1=data1,
-        data2=[0]*7
+        data2=[0] * 7
     )
+
+    ## File types
+    # Get mime types from database
+    rates = Sample.objects.item_frequencies('mime')
+    stats = [v for i, v in rates.items()]
+    types = [i for i in rates]
+
+    fileType = dict(
+        stats=stats,
+        types=types
+    )
+    print(stats, types, rates)
 
     return dict(
         samplesNb=samplesNb,
         samplesChart=samplesChart,
-        diskUsage=diskUsage
+        diskUsage=diskUsage,
+        fileType=fileType
     )

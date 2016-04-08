@@ -54,7 +54,7 @@ def upload():
     chmod(newfile, 0o400)
 
     # Then analyse it and show results
-    analyser = Analyser(sha256=sha256sum, filename=file.filename)
+    analyser = Analyser(sha256=sha256sum, filename=file.filename, mime=mime)
     analyser.analyse()
     return redirect(url_for('default.file', sha256=sha256sum, action='analysis'))
 

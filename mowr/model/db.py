@@ -13,3 +13,4 @@ class Sample(Document):
     pmf_analysis = ListField()
     vote_clean = IntField()
     vote_malicious = IntField()
+    mime = StringField(max_length=25)
