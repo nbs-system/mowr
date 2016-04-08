@@ -43,8 +43,8 @@ class Analyser:
 
         if not self.getsample():
             Sample(
-                first_analysis=datetime.utcnow().ctime(),
-                last_analysis=datetime.utcnow().ctime(),
+                first_analysis=datetime.utcnow(),
+                last_analysis=datetime.utcnow(),
                 name=[filename],
                 md5=md5sum,
                 sha256=sha256sum,
@@ -55,7 +55,7 @@ class Analyser:
             ).save()
         else:
             Sample.objects(sha256=self.sha256).first().update(
-                last_analysis=datetime.utcnow().ctime(),
+                last_analysis=datetime.utcnow(),
                 md5=md5sum,
                 sha256=sha256sum,
                 ssdeep=ssdeephash,

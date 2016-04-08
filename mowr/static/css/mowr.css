@@ -27,6 +27,10 @@ body {
     background-color: #e7e7e7;
 }
 
+.alert-small {
+    display: inline-block;
+}
+
 .error_nb {
     font-size: 48px;
 }
