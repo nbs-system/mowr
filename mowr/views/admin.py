@@ -79,9 +79,12 @@ def getstats():
     ## Graph 1
     # Last 7 days dates from oldest to newest
     if six.PY2:
-        dateList = list(reversed([datetime.fromtimestamp((datetime.utcnow() - datetime.fromtimestamp(0)).total_seconds() - 3600 * 24 * i) for i in range(7)]))
+        dateList = list(reversed(
+            [datetime.fromtimestamp((datetime.utcnow() - datetime.fromtimestamp(0)).total_seconds() - 3600 * 24 * i) for
+             i in range(7)]))
     else:
-        dateList = list(reversed([datetime.fromtimestamp(datetime.utcnow().timestamp() - 3600 * 24 * i) for i in range(7)]))
+        dateList = list(
+            reversed([datetime.fromtimestamp(datetime.utcnow().timestamp() - 3600 * 24 * i) for i in range(7)]))
     dateList = [i.replace(minute=0, hour=0, second=0, microsecond=0) for i in dateList]
     # Count the samples
     data1 = [Sample.objects(first_analysis__gte=dateList[i], first_analysis__lt=dateList[i + 1]).count() for i in
