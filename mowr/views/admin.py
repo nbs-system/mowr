@@ -1,6 +1,7 @@
 from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
 from mowr.model.db import Sample
 from datetime import datetime
+import six
 import os
 
 admin = Blueprint('admin', __name__, url_prefix='/admin', static_folder='../static_admin', static_url_path='/static')
@@ -77,7 +78,10 @@ def getstats():
 
     ## Graph 1
     # Last 7 days dates from oldest to newest
-    dateList = list(reversed([datetime.fromtimestamp(datetime.utcnow().timestamp() - 3600 * 24 * i) for i in range(7)]))
+    if six.PY2:
+        dateList = list(reversed([datetime.fromtimestamp((datetime.utcnow() - datetime.fromtimestamp(0)).total_seconds() - 3600 * 24 * i) for i in range(7)]))
+    else:
+        dateList = list(reversed([datetime.fromtimestamp(datetime.utcnow().timestamp() - 3600 * 24 * i) for i in range(7)]))
     dateList = [i.replace(minute=0, hour=0, second=0, microsecond=0) for i in dateList]
     # Count the samples
     data1 = [Sample.objects(first_analysis__gte=dateList[i], first_analysis__lt=dateList[i + 1]).count() for i in
@@ -95,13 +99,15 @@ def getstats():
     # Get mime types from database
     rates = Sample.objects.item_frequencies('mime')
     stats = [v for i, v in rates.items()]
-    types = [i for i in rates]
+    if six.PY2:
+        types = [i.encode('utf-8') for i in rates]
+    else:
+        types = [i for i in rates]
 
     fileType = dict(
         stats=stats,
         types=types
     )
-    print(stats, types, rates)
 
     return dict(
         samples=samples,
