@@ -80,27 +80,29 @@
     </div>
 {% endblock %}
 {% block script %}
-    <script src="{{ url_for('static', filename='js/gauge.min.js') }}"></script>
-    <script>
-        var opts = {
-            lines: 12, // The number of lines to draw
-            angle: 0, // The length of each line
-            lineWidth: 0.2, // The line thickness
-            pointer: {
-                length: 0.51, // The radius of the inner circle
-                strokeWidth: 0.033, // The rotation offset
-                color: '#000000' // Fill color
-            },
-            limitMax: 'false',   // If true, the pointer will not go past the end of the gauge
-            colorStart: '#690202',   // Colors
-            colorStop: '#D10000',    // just experiment with them
-            strokeColor: '#10C778',   // to see which ones work best for you
-            generateGradient: true
-        };
-        var target = document.getElementById('gauge-ratio'); // your canvas element
-        var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
-        gauge.maxValue = {{ vote }}; // set max gauge value
-        gauge.animationSpeed = 27; // set animation speed (32 is default value)
-        gauge.set({{ file['vote_malicious'] }}); // set actual value
-    </script>
+    {% if file['vote_clean']|int > 0 or file['vote_malicious']|int > 0 %}
+        <script src="{{ url_for('static', filename='js/gauge.min.js') }}"></script>
+        <script>
+            var opts = {
+                lines: 12, // The number of lines to draw
+                angle: 0, // The length of each line
+                lineWidth: 0.2, // The line thickness
+                pointer: {
+                    length: 0.51, // The radius of the inner circle
+                    strokeWidth: 0.033, // The rotation offset
+                    color: '#000000' // Fill color
+                },
+                limitMax: 'false',   // If true, the pointer will not go past the end of the gauge
+                colorStart: '#690202',   // Colors
+                colorStop: '#D10000',    // just experiment with them
+                strokeColor: '#10C778',   // to see which ones work best for you
+                generateGradient: true
+            };
+            var target = document.getElementById('gauge-ratio'); // your canvas element
+            var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+            gauge.maxValue = {{ vote }}; // set max gauge value
+            gauge.animationSpeed = 27; // set animation speed (32 is default value)
+            gauge.set({{ file['vote_malicious'] }}); // set actual value
+        </script>
+    {% endif %}
 {% endblock %}
