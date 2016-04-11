@@ -26,9 +26,9 @@
         <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
             <div class="left"></div>
             <div class="right">
-                <span class="count_top"><i class="fa fa-user"></i> None</span>
-                <div class="count green">0</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+                <span class="count_top"><i class="fa fa-user"></i> Average time</span>
+                <div class="count">{{ stats.get('samples').get('average_time') }}ms</div>
+                <span class="count_bottom">Since the beginning</span>
             </div>
         </div>
         <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">

@@ -5,6 +5,7 @@ import ssdeep
 from flask import current_app, flash, session
 from os import access, R_OK
 from mowr.model.db import Sample
+from time import time
 from werkzeug.utils import secure_filename
 
 
@@ -27,6 +28,9 @@ class Analyser:
             flash('There was an error while trying to analyse the file.', 'danger')
             return False
 
+        # Start time counter
+        start = time()
+
         # Compute hashes
         with open(self.file, 'rb') as f:
             buf = f.read()
@@ -42,6 +46,11 @@ class Analyser:
         analysis = subprocess.check_output([current_app.config['PMF_BIN'], self.file])
         analysis = [v for i, v in list(enumerate(analysis.decode('utf-8').split())) if i % 2 == 0]
 
+        # End time counter
+        end = time()
+        analysis_time = end-start
+        print(analysis_time)
+
         if not self.getsample():
             Sample(
                 first_analysis=datetime.utcnow(),
@@ -51,6 +60,7 @@ class Analyser:
                 sha256=sha256sum,
                 ssdeep=ssdeephash,
                 pmf_analysis=analysis,
+                analysis_time=analysis_time,
                 vote_clean=0,
                 vote_malicious=0,
                 mime=self.mime
@@ -62,6 +72,7 @@ class Analyser:
                 sha256=sha256sum,
                 ssdeep=ssdeephash,
                 pmf_analysis=analysis,
+                analysis_time=analysis_time,
                 add_to_set__name=filename
             )
             

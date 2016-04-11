@@ -1,6 +1,6 @@
 from flask_mongoengine import Document
 import datetime
-from mongoengine import StringField, ListField, IntField, DateTimeField
+from mongoengine import StringField, ListField, IntField, DateTimeField, FloatField
 
 
 class Sample(Document):
@@ -11,6 +11,7 @@ class Sample(Document):
     sha256 = StringField(max_length=64)
     ssdeep = StringField()
     pmf_analysis = ListField()
-    vote_clean = IntField()
-    vote_malicious = IntField()
+    analysis_time = FloatField(default=0)
+    vote_clean = IntField(default=0)
+    vote_malicious = IntField(default=0)
     mime = StringField(max_length=25)

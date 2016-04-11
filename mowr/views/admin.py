@@ -71,11 +71,16 @@ def getstats():
     # Get clean and malicious files
     clean = Sample.objects(pmf_analysis__size=0).count()
     malicious = samplesNb - clean
+    # Get average time
+    average_time = Sample.objects.average('analysis_time')
+    average_time *= 1000 # To milliseconds
+    average_time = '%.3f' % average_time # Truncate
 
     samples = dict(
         nb=samplesNb,
         clean=clean,
-        malicious=malicious
+        malicious=malicious,
+        average_time=average_time
     )
 
     ## Disk usage
