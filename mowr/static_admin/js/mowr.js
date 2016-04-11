@@ -1,6 +1,6 @@
 function search_sample() {
     var query = $("#search-samples")[0].value;
-    if (query.length < 4) {
+    if (query.length < 2) {
         return;
     }
     $.ajax({

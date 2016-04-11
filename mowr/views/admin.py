@@ -145,8 +145,9 @@ def search(query):
     if query is None:
         return ''
     samples = Sample.objects(sha256__icontains=query)
-    if samples is None or samples == []:
+    if not samples:
         samples = Sample.objects(name__icontains=query)
-    if samples is None or samples == []:
+        print(samples)
+    if not samples:
         return ''
     return [samp for samp in samples]

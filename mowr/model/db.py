@@ -6,7 +6,7 @@ from mongoengine import StringField, ListField, IntField, DateTimeField, FloatFi
 class Sample(Document):
     first_analysis = DateTimeField(required=True, default=datetime.datetime.utcnow())
     last_analysis = DateTimeField(required=True, default=datetime.datetime.utcnow())
-    name = ListField(max_length=20)
+    name = ListField(StringField(), maxlength=20)
     md5 = StringField(max_length=32)
     sha256 = StringField(max_length=64)
     ssdeep = StringField()
