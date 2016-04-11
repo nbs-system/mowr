@@ -9,6 +9,7 @@ admin = Blueprint('admin', __name__, url_prefix='/admin', static_folder='../stat
 
 @admin.route('/')
 def index():
+    """ Index page with statistics """
     if 'login' not in session:
         return redirect(url_for('admin.login'))
     elif session.get('login') == current_app.config['ADMIN_LOGIN']:
@@ -18,6 +19,7 @@ def index():
 
 @admin.route('/login', methods=['GET', 'POST'])
 def login():
+    """ Logs the user in """
     if 'login' in session:
         return redirect(url_for('admin.index'))
 
@@ -39,13 +41,26 @@ def logout():
     return redirect(url_for('default.index'))
 
 
-@admin.route('/samples')
+@admin.route('/samples', methods=['GET', 'POST'])
 def samples():
+    """ Samples page """
     if 'login' not in session:
         return redirect(url_for('admin.login'))
     elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        return render_template('admin/samples.html')
+        s = search(request.form.get('search'))
+        return render_template('admin/samples.html', search=s)
     abort(404)
+
+
+@admin.route('/search/<query>/<formated>')
+def searchpage(query, formated=None):
+    """ API for searching (ajax) """
+    if 'login' not in session:
+        abort(404)
+    s = search(query)
+    if formated is not None:
+        return render_template('admin/search_result.html', search=s)
+    return str(s)
 
 
 def getstats():
@@ -118,3 +133,15 @@ def getstats():
         diskUsage=diskUsage,
         fileType=fileType
     )
+
+
+def search(query):
+    """ Search for a sample matching query """
+    if query is None:
+        return ''
+    samples = Sample.objects(sha256__icontains=query)
+    if samples is None or samples == []:
+        samples = Sample.objects(name__icontains=query)
+    if samples is None or samples == []:
+        return ''
+    return [samp for samp in samples]

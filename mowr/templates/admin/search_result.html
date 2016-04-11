@@ -1,0 +1,20 @@
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>Original name</td>
+        <td>SHA256</td>
+        <td>First analysis</td>
+        <td>Last analysis</td>
+    </tr>
+    </thead>
+    <tbody>
+    {% for s in search %}
+        <tr>
+            <td><a href="{{ url_for('default.file', sha256=s.sha256, action='analysis') }}">{{ s.name[0] }}</a></td>
+            <td><a href="{{ url_for('default.file', sha256=s.sha256, action='analysis') }}">{{ s.sha256 }}</a></td>
+            <td>{{ s.first_analysis }}</td>
+            <td>{{ s.last_analysis }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

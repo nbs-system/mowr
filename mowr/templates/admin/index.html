@@ -1,363 +1,256 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <!-- Meta, title, CSS, favicons, etc. -->
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>MOWR - Administration</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="{{ url_for('admin.static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-
-    <link href="{{ url_for('admin.static', filename='fonts/css/font-awesome.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('admin.static', filename='css/animate.min.css') }}" rel="stylesheet">
-
-    <!-- Custom styling plus plugins -->
-    <link href="{{ url_for('admin.static', filename='css/custom.css') }}" rel="stylesheet">
-    <link rel="stylesheet" type="text/css"
-          href="{{ url_for('admin.static', filename='css/maps/jquery-jvectormap-2.0.3.css') }}"/>
-    <link href="{{ url_for('admin.static', filename='css/icheck/flat/green.css" rel="stylesheet') }}"/>
-    <link href="{{ url_for('admin.static', filename='css/floatexamples.css" rel="stylesheet" type="text/css') }}"/>
-
-    <script src="{{ url_for('admin.static', filename='js/jquery.min.js') }}"></script>
-    <script src="{{ url_for('admin.static', filename='js/nprogress.js') }}"></script>
-
-    <!--[if lt IE 9]>
-	<script src="{{ url_for('admin.static', filename='../assets/js/ie8-responsive-file-warning.js') }}"></script>
-	<![endif]-->
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-	<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	<![endif]-->
-
-</head>
-
-
-<body class="nav-md">
-<div class="container body">
-    <div class="main_container">
-        {% include "admin/sidebar.html" %}
-
-        <!-- page content -->
-        <div class="right_col" role="main">
-
-            <!-- top tiles -->
-            <div class="row tile_count">
-                <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
-                    <div class="left"></div>
-                    <div class="right">
-                        <span class="count_top"><i class="fa fa-file"></i> Total Samples</span>
-                        <div class="count">{{ '{:,d}'.format(stats.get('samples').get('nb')) }}</div>
-                        <span class="count_bottom">All types</span>
-                    </div>
-                </div>
-                <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
-                    <div class="left"></div>
-                    <div class="right">
-                        <span class="count_top"><i class="fa fa-file"></i> Malicious ratio</span>
-                        <canvas style="width: 94px; display: block; margin-left: -10px; margin-right: -30px;"
-                                id="gaugeClean"></canvas>
-                        <span class="count_bottom">
-                        <span id="gauge-text">{{ stats.get('samples').get('malicious') }}</span>
-                        <span id="goal-text"
-                              style="margin-left: 62px;">{{ stats.get('samples').get('clean') }}</span>
-                        </span>
-                    </div>
-                </div>
-                <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
-                    <div class="left"></div>
-                    <div class="right">
-                        <span class="count_top"><i class="fa fa-user"></i> None</span>
-                        <div class="count green">0</div>
-                        <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
-                    </div>
-                </div>
-                <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
-                    <div class="left"></div>
-                    <div class="right">
-                        <span class="count_top"><i class="fa fa-user"></i> None</span>
-                        <div class="count">0</div>
-                        <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span>
-                    </div>
-                </div>
-                <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
-                    <div class="left"></div>
-                    <div class="right">
-                        <span class="count_top"><i class="fa fa-user"></i> None</span>
-                        <div class="count">0</div>
-                        <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
-                    </div>
-                </div>
-                <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
-                    <div class="left"></div>
-                    <div class="right">
-                        <span class="count_top"><i class="fa fa-user"></i> None</span>
-                        <div class="count">0</div>
-                        <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
-                    </div>
-                </div>
-
+{% extends "admin/layout.html" %}
+{% block content %}
+    <!-- top tiles -->
+    <div class="row tile_count">
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-file"></i> Total Samples</span>
+                <div class="count">{{ '{:,d}'.format(stats.get('samples').get('nb')) }}</div>
+                <span class="count_bottom">All types</span>
             </div>
-            <!-- /top tiles -->
-
-            <div class="row">
-                <div class="col-md-12 col-sm-12 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Line graph
-                                <small>Sessions</small>
-                            </h2>
-                            <ul class="nav navbar-right panel_toolbox">
-                                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                                </li>
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                                       aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                                    <ul class="dropdown-menu" role="menu">
-                                        <li><a href="#">Settings 1</a>
-                                        </li>
-                                        <li><a href="#">Settings 2</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a class="close-link"><i class="fa fa-close"></i></a>
-                                </li>
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
-                            <canvas id="samplesChart" height="75px"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- graphs -->
-            <div class="row">
-                <div class="col-md-4 col-sm-6 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Disk usage
-                                <small>(in bytes)</small>
-                            </h2>
-                            <ul class="nav navbar-right panel_toolbox">
-                                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                                </li>
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                                       aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                                    <ul class="dropdown-menu" role="menu">
-                                        <li><a href="#">Settings 1</a>
-                                        </li>
-                                        <li><a href="#">Settings 2</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a class="close-link"><i class="fa fa-close"></i></a>
-                                </li>
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
-                            <canvas id="diskUsage"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Most uploaded file type
-                                <small></small>
-                            </h2>
-                            <ul class="nav navbar-right panel_toolbox">
-                                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                                </li>
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                                       aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                                    <ul class="dropdown-menu" role="menu">
-                                        <li><a href="#">Settings 1</a>
-                                        </li>
-                                        <li><a href="#">Settings 2</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a class="close-link"><i class="fa fa-close"></i></a>
-                                </li>
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
-                            <canvas id="fileType"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- /graphs -->
-
-            <!-- footer content -->
-            <footer>
-                <div class="copyright-info">
-                    <p class="pull-right">Gentelella - Bootstrap Admin Template by <a href="https://colorlib.com">Colorlib</a>
-                    </p>
-                </div>
-                <div class="clearfix"></div>
-            </footer>
-            <!-- /footer content -->
         </div>
-        <!-- /page content -->
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-file"></i> Malicious ratio</span>
+                <canvas style="width: 94px; display: block; margin-left: -10px; margin-right: -30px;"
+                        id="gaugeClean"></canvas>
+                <span class="count_bottom">
+                <span id="gauge-text">{{ stats.get('samples').get('malicious') }}</span>
+                <span id="goal-text"
+                      style="margin-left: 62px;">{{ stats.get('samples').get('clean') }}</span>
+                </span>
+            </div>
+        </div>
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-user"></i> None</span>
+                <div class="count green">0</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+            </div>
+        </div>
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-user"></i> None</span>
+                <div class="count">0</div>
+                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span>
+            </div>
+        </div>
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-user"></i> None</span>
+                <div class="count">0</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+            </div>
+        </div>
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-user"></i> None</span>
+                <div class="count">0</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+            </div>
+        </div>
 
     </div>
+    <!-- /top tiles -->
 
-</div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Line graph
+                        <small>Sessions</small>
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Settings 1</a>
+                                </li>
+                                <li><a href="#">Settings 2</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <canvas id="samplesChart" height="75px"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div id="custom_notifications" class="custom-notifications dsp_none">
-    <ul class="list-unstyled notifications clearfix" data-tabbed_notifications="notif-group">
-    </ul>
-    <div class="clearfix"></div>
-    <div id="notif-group" class="tabbed_notifications"></div>
-</div>
+    <!-- graphs -->
+    <div class="row">
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Disk usage
+                        <small>(in bytes)</small>
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Settings 1</a>
+                                </li>
+                                <li><a href="#">Settings 2</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <canvas id="diskUsage"></canvas>
+                </div>
+            </div>
+        </div>
 
-<script src="{{ url_for('admin.static', filename='js/bootstrap.min.js') }}"></script>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Most uploaded file type
+                        <small></small>
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Settings 1</a>
+                                </li>
+                                <li><a href="#">Settings 2</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <canvas id="fileType"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /graphs -->
+{% endblock %}
+{% block script %}
+    <script>
+        var ctx;
+        var data;
 
-<!-- gaugejs -->
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/gauge/gauge.min.js') }}"></script>
-<!-- daterangepicker -->
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/moment/moment.min.js') }}"></script>
-<script type="text/javascript"
-        src="{{ url_for('admin.static', filename='js/datepicker/daterangepicker.js') }}"></script>
-<!-- chart js -->
-<script src="{{ url_for('admin.static', filename='js/chartjs/chart.min.js') }}"></script>
-<!-- bootstrap progress js -->
-<script src="{{ url_for('admin.static', filename='js/progressbar/bootstrap-progressbar.min.js') }}"></script>
-<script src="{{ url_for('admin.static', filename='js/nicescroll/jquery.nicescroll.min.js') }}"></script>
-<!-- icheck -->
-<script src="{{ url_for('admin.static', filename='js/icheck/icheck.min.js') }}"></script>
-<!-- daterangepicker -->
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/moment/moment.min.js') }}"></script>
-<script type="text/javascript"
-        src="{{ url_for('admin.static', filename='js/datepicker/daterangepicker.js') }}"></script>
+        // Gauge
+        var opts = {
+            lines: 12, // The number of lines to draw
+            angle: 0, // The length of each line
+            lineWidth: 0.4, // The line thickness
+            pointer: {
+                length: 0.75, // The radius of the inner circle
+                strokeWidth: 0.042, // The rotation offset
+                color: '#1D212A' // Fill color
+            },
+            limitMax: 'false', // If true, the pointer will not go past the end of the gauge
+            colorStart: '#DF013A', // Colors
+            colorStop: '#DF013A', // just experiment with them
+            strokeColor: '#1ABC9C', // to see which ones work best for you
+            generateGradient: false
+        };
+        var target = document.getElementById('gaugeClean'); // your canvas element
+        var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+        gauge.maxValue = {{ stats.get('samples').get('nb') }}; // set max gauge value
+        gauge.animationSpeed = 32; // set animation speed (32 is default value)
+        gauge.set({{ stats.get('samples').get('malicious') }}); // set actual value
+        gauge.setTextField(document.getElementById("gauge-text"));
 
-<script src="{{ url_for('admin.static', filename='js/custom.js') }}"></script>
+        // Main graph
+        ctx = document.getElementById("samplesChart");
+        var lineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ stats.get('samplesChart').get('dateList')|safe }},
+                datasets: [{
+                    label: "Uploaded files",
+                    backgroundColor: "rgba(38, 185, 154, 0.31)",
+                    borderColor: "rgba(38, 185, 154, 0.7)",
+                    pointBorderColor: "rgba(38, 185, 154, 0.7)",
+                    pointBackgroundColor: "rgba(38, 185, 154, 0.7)",
+                    pointHoverBackgroundColor: "#fff",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointBorderWidth: 1,
+                    data: {{ stats.get('samplesChart').get('data1') }}
+                }]
+            }
+        });
 
-<!-- flot js -->
-<!--[if lte IE 8]><script type="text/javascript" src="{{ url_for('admin.static', filename='js/excanvas.min.js') }}"></script>
-<![endif]-->
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/flot/jquery.flot.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/flot/jquery.flot.pie.js') }}"></script>
-<script type="text/javascript"
-        src="{{ url_for('admin.static', filename='js/flot/jquery.flot.orderBars.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/flot/jquery.flot.time.min.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/flot/date.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/flot/jquery.flot.spline.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/flot/jquery.flot.stack.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/flot/curvedLines.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('admin.static', filename='js/flot/jquery.flot.resize.js') }}"></script>
-<script>
-    var ctx;
-    var data;
-
-    // Gauge
-    var opts = {
-        lines: 12, // The number of lines to draw
-        angle: 0, // The length of each line
-        lineWidth: 0.4, // The line thickness
-        pointer: {
-            length: 0.75, // The radius of the inner circle
-            strokeWidth: 0.042, // The rotation offset
-            color: '#1D212A' // Fill color
-        },
-        limitMax: 'false', // If true, the pointer will not go past the end of the gauge
-        colorStart: '#DF013A', // Colors
-        colorStop: '#DF013A', // just experiment with them
-        strokeColor: '#1ABC9C', // to see which ones work best for you
-        generateGradient: false
-    };
-    var target = document.getElementById('gaugeClean'); // your canvas element
-    var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
-    gauge.maxValue = {{ stats.get('samples').get('nb') }}; // set max gauge value
-    gauge.animationSpeed = 32; // set animation speed (32 is default value)
-    gauge.set({{ stats.get('samples').get('malicious') }}); // set actual value
-    gauge.setTextField(document.getElementById("gauge-text"));
-
-    // Main graph
-    ctx = document.getElementById("samplesChart");
-    var lineChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ stats.get('samplesChart').get('dateList')|safe }},
+        // Disk usage
+        ctx = document.getElementById("diskUsage");
+        data = {
             datasets: [{
-                label: "Uploaded files",
-                backgroundColor: "rgba(38, 185, 154, 0.31)",
-                borderColor: "rgba(38, 185, 154, 0.7)",
-                pointBorderColor: "rgba(38, 185, 154, 0.7)",
-                pointBackgroundColor: "rgba(38, 185, 154, 0.7)",
-                pointHoverBackgroundColor: "#fff",
-                pointHoverBorderColor: "rgba(220,220,220,1)",
-                pointBorderWidth: 1,
-                data: {{ stats.get('samplesChart').get('data1') }}
-            }]
-        }
-    });
+                data: [{{ stats.get('diskUsage').get('remaining_storage') }}, {{ stats.get('diskUsage').get('file_size') }}],
+                backgroundColor: [
+                    "#BDC3C7",
+                    "#26B99A"
+                ],
+                label: 'Disk usage' // for legend
+            }],
+            labels: [
+                "Remaining space",
+                "Used space"
+            ]
+        };
 
-    // Disk usage
-    ctx = document.getElementById("diskUsage");
-    data = {
-        datasets: [{
-            data: [{{ stats.get('diskUsage').get('remaining_storage') }}, {{ stats.get('diskUsage').get('file_size') }}],
-            backgroundColor: [
-                "#BDC3C7",
-                "#26B99A"
-            ],
-            label: 'Disk usage' // for legend
-        }],
-        labels: [
-            "Remaining space",
-            "Used space"
-        ]
-    };
+        var diskUsage = new Chart(ctx, {
+            data: data,
+            type: 'pie',
+            otpions: {
+                legend: true
+            }
+        });
 
-    var diskUsage = new Chart(ctx, {
-        data: data,
-        type: 'pie',
-        otpions: {
-            legend: true
-        }
-    });
+        // File type
+        ctx = document.getElementById("fileType");
+        data = {
+            datasets: [{
+                data: {{ stats.get('fileType').get('stats') }},
+                backgroundColor: [
+                    "#9B59B6",
+                    "#BDC3C7",
+                    "#26B99A",
+                    "#3498DB",
+                    "#455C73"
+                ],
+                label: 'File types' // for legend
+            }],
+            labels: {{ stats.get('fileType').get('types')|safe }}
+        };
 
-    // File type
-    ctx = document.getElementById("fileType");
-    data = {
-        datasets: [{
-            data: {{ stats.get('fileType').get('stats') }},
-            backgroundColor: [
-                "#9B59B6",
-                "#BDC3C7",
-                "#26B99A",
-                "#3498DB",
-                "#455C73"
-            ],
-            label: 'File types' // for legend
-        }],
-        labels: {{ stats.get('fileType').get('types')|safe }}
-    };
-
-    var fileType = new Chart(ctx, {
-        data: data,
-        type: 'pie',
-        otpions: {
-            legend: true
-        }
-    });
-
-</script>
-</body>
-
-</html>
+        var fileType = new Chart(ctx, {
+            data: data,
+            type: 'pie',
+            otpions: {
+                legend: true
+            }
+        });
+    </script>
+{% endblock %}
