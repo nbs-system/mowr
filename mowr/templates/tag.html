@@ -2,13 +2,18 @@
 {% block content %}
     Scan result:
     <table class="table table-bordered">
-    {% for file in files %}
-        <tr><td><a href="{{ url_for('default.file', sha256=file['sha256'], action='analysis') }}">{{ file['sha256'] }}</a></td><td>
-            {% for i in file['pmf_analysis'] %}
-                {{ formatTag('pmf', i)|safe }}
-            {% endfor %}
-        </td></tr>
-    {% endfor %}
+        {% for file in files %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('default.file', sha256=file['sha256'], action='analysis') }}">{{ file['sha256'] }}</a>
+                </td>
+                <td>
+                    {% for i in file['pmf_analysis'] %}
+                        {{ formatTag('pmf', i)|safe }}
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
     </table>
 
     <a href="{{ url_for('default.index') }}"><span class="btn btn-info">Upload a new file</span></a>

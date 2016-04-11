@@ -147,7 +147,6 @@ def search(query):
     samples = Sample.objects(sha256__icontains=query)
     if not samples:
         samples = Sample.objects(name__icontains=query)
-        print(samples)
     if not samples:
         return ''
     return [samp for samp in samples]

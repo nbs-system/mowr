@@ -6,8 +6,9 @@
         <form action="{{ url_for('default.upload') }}" method="post" enctype="multipart/form-data" class="dropzone"
               id="dropzone">
             <span class="btn btn-file">
-            Drop a file here or click to browse
-                <input type="file" name="file" class="btn-input" id="dropzone-file">
+                <i class="glyphicon glyphicon-file upload-icon"></i>
+                <span class="center">Drag and drop a file here or click to browse</span>
+                <input type="file" name="file" class="btn-input" id="dropzone-file" onchange="hashFile()">
             </span>
             <input onclick="hashFile()" type="button" value="Upload" class="btn btn-info btn-lg">
         </form>

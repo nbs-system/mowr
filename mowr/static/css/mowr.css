@@ -13,7 +13,8 @@ body {
     padding: 50px 30%;
     border: 4px dashed #ccc;
     display: block;
-    margin-bottom: 20px;
+    margin-top: 40px;
+    margin-bottom: 40px;
 }
 
 .btn-file input[type=file] {
@@ -30,6 +31,12 @@ body {
     background: white;
     cursor: inherit;
     display: block;
+}
+
+.upload-icon {
+    font-size: 50px;
+    display: block;
+    margin-bottom: 20px;
 }
 
 .center {
@@ -57,4 +64,24 @@ body {
 
 .error a, .error a:visited {
     color: #245269;
+}
+
+.vote {
+    display: block;
+}
+
+.vote_malicious {
+    display: inline;
+    color: #D10000;
+    margin-right: 65px;
+}
+
+.vote_clean {
+    display: inline;
+    color: #10C778;
+    margin-left: 65px;
+}
+
+.gauge canvas {
+    width: 150px;
 }
