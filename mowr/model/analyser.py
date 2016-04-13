@@ -10,10 +10,11 @@ from werkzeug.utils import secure_filename
 
 
 class Analyser:
-    def __init__(self, sha256, filename='', mime=''):
+    def __init__(self, sha256, filename='', mime='', filetype=None):
         self.sha256 = sha256
         self.filename = secure_filename(filename)
         self.mime = mime
+        self.filetype = filetype
         self.file = self.getfilepath(self.sha256)
 
     @staticmethod
@@ -43,8 +44,12 @@ class Analyser:
 
         # Start the analysis
         # TODO yara bindings ?
-        analysis = subprocess.check_output([current_app.config['PMF_BIN'], self.file])
-        analysis = [v for i, v in list(enumerate(analysis.decode('utf-8').split())) if i % 2 == 0]
+        if self.filetype == 'ASP':
+            analysis = subprocess.check_output([current_app.config['PMF_BIN'], '-l', 'asp', self.file])
+            analysis = [v for i, v in list(enumerate(analysis.decode('utf-8').split())) if i % 2 == 0]
+        else:
+            analysis = subprocess.check_output([current_app.config['PMF_BIN'], self.file])
+            analysis = [v for i, v in list(enumerate(analysis.decode('utf-8').split())) if i % 2 == 0]
 
         # End time counter
         end = time()
@@ -63,7 +68,8 @@ class Analyser:
                 analysis_time=analysis_time,
                 vote_clean=0,
                 vote_malicious=0,
-                mime=self.mime
+                mime=self.mime,
+                type=self.filetype
             ).save()
         else:
             Sample.objects(sha256=self.sha256).first().update(
@@ -73,7 +79,8 @@ class Analyser:
                 ssdeep=ssdeephash,
                 pmf_analysis=analysis,
                 analysis_time=analysis_time,
-                add_to_set__name=filename
+                add_to_set__name=filename,
+                type=self.filetype
             )
             
         # Allow the user to vote for his sample

@@ -5,6 +5,12 @@
         <h3>More Obvious Web-malware Repository</h3>
         <form action="{{ url_for('default.upload') }}" method="post" enctype="multipart/form-data" class="dropzone"
               id="dropzone">
+            <label for="select">File type ?</label>
+            <select id="select" name="filetype">
+                {% for option in file_types %}
+                    <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select>
             <span class="btn btn-file">
                 <i class="glyphicon glyphicon-file upload-icon"></i>
                 <span class="center">Drag and drop a file here or click to browse</span>

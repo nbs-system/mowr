@@ -15,3 +15,4 @@ class Sample(Document):
     vote_clean = IntField(default=0)
     vote_malicious = IntField(default=0)
     mime = StringField(max_length=25)
+    type = StringField(max_length=5)

@@ -54,7 +54,8 @@ def upload():
     chmod(newfile, 0o400)
 
     # Then analyse it and show results
-    analyser = Analyser(sha256=sha256sum, filename=file.filename, mime=mime)
+    filetype = request.form.get('filetype')
+    analyser = Analyser(sha256=sha256sum, filename=file.filename, mime=mime, filetype=filetype)
     analyser.analyse()
     return redirect(url_for('default.file', sha256=sha256sum, action='analysis'))
 
@@ -111,7 +112,7 @@ def vote(sha256, mode):
 
 @default.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', file_types=['PHP', 'ASP'])
 
 
 
