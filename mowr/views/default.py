@@ -30,14 +30,8 @@ def upload():
     if request.content_length >= current_app.config['MAX_CONTENT_LENGTH']:
         abort(413)
 
-    # Check file mime type from file stream and not from request content
-    file_content = file.stream.read()
-    mime = magic.from_buffer(file_content, mime=True).decode('utf-8')
-    if mime not in current_app.config['ALLOWED_MIME']:
-        flash('Sorry, this file type is not allowed. Please try with another one.', 'warning')
-        return redirect(url_for('default.index'))
-
     # Check the file sha256 and if it already exists
+    file_content = file.stream.read()
     sha256sum = sha256(file_content).hexdigest()
     f = Sample.objects(sha256=sha256sum).first()
 
