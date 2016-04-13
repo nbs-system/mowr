@@ -4,6 +4,7 @@ import unittest
 import os
 from io import BytesIO as StringIO
 
+
 class DefaultTestCase(unittest.TestCase):
     def setUp(self):
         app = create_app('../tests/config_test.cfg')
@@ -13,7 +14,7 @@ class DefaultTestCase(unittest.TestCase):
         Sample.drop_collection()
         # Remove files from test folder
         for f in os.listdir(app.config['UPLOAD_FOLDER']):
-            # Dont delete any file, just sha256 looking one (in cas of configuration mistake)
+            # Do not delete any file, just sha256 looking one (in case of configuration mistake)
             if len(f) == 64:
                 os.remove('{0}/{1}'.format(app.config['UPLOAD_FOLDER'], f))
 
@@ -35,7 +36,8 @@ class DefaultTestCase(unittest.TestCase):
         file_name = "obfuscated.php"
         rv = self.app.post('/upload', data=dict(
             file=(StringIO(file_content), file_name),
-            filename=file_name
+            filename=file_name,
+            type='PHP'
         ), follow_redirects=True).data.decode('utf-8')
         self.assertTrue(file_name in rv)
         self.assertTrue('ObfuscatedPhp' in rv)
@@ -44,12 +46,14 @@ class DefaultTestCase(unittest.TestCase):
         # Upload the same file and check redirection
         rv = self.app.post('/upload', data=dict(
             file=(StringIO(file_content), file_name),
-            filename=file_name
+            filename=file_name,
+            type='PHP'
         ), follow_redirects=True).data.decode('utf-8')
         self.assertTrue('This file has already been analysed.' in rv)
 
     def test_checkfile(self):
-        self.assertEqual(self.app.get('/file/NON-EXISTANT_SHA').data.decode('utf-8'), 'NOK')
+        rv = self.app.get('/sample/PHP/NON-EXISTANT_SHA').data.decode('utf-8')
+        self.assertEqual(rv, 'NOK')
 
 if __name__ == '__main__':
     unittest.main()

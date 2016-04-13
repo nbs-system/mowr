@@ -5,8 +5,8 @@
         <h3>More Obvious Web-malware Repository</h3>
         <form action="{{ url_for('default.upload') }}" method="post" enctype="multipart/form-data" class="dropzone"
               id="dropzone">
-            <label for="select">File type ?</label>
-            <select id="select" name="filetype">
+            <label for="select_type">File type ?</label>
+            <select id="select_type" name="type">
                 {% for option in file_types %}
                     <option value="{{ option }}">{{ option }}</option>
                 {% endfor %}

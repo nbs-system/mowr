@@ -28,13 +28,14 @@ function hashFile() {
 
     reader.onload = function() {
         var sha256 = CryptoJS.SHA256(reader.result);
-        $.ajax({url: "/file/" + sha256, success: function(result) {
+        var type = $("#select_type")[0].value;
+        $.ajax({url: '/sample/' + type + '/' + sha256, success: function(result) {
             if (result === "NOK") {
                 // Upload the file
                 $("#dropzone").submit();
             } else {
                 // Do not upload the file but post filename
-                redirect_by_post('/file/' + sha256 + '/choose', {filename: filename}, false)
+                redirect_by_post('/choose/' + type + '/' + sha256, {filename: filename}, false)
             }
         }})
     };

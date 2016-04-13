@@ -43,11 +43,6 @@
             <td>{{ file['mime'] }}</td>
         </tr>
         <tr>
-            <td>Type</td>
-            <td>{{ file['type'] }}</td>
-        </tr>
-
-        <tr>
             <td colspan="2" class="active">Dates</td>
         </tr>
         <tr>
@@ -62,8 +57,15 @@
         <tr>
             <td colspan="2" class="active">File analysis</td>
         </tr>
-        <tr>
-            <td>PMF</td>
+        {% for analysis in file['analyzes'] %}
+            {% if analysis.type == type %}
+            <tr>
+            <td>{{ analysis.soft }}</td>
+            <td>{{ analysis.result }} | {{ analysis.analysis_time }}</td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+            <!--<td>PMF</td>
             <td>
                 {% if file['pmf_analysis']|length == 0 %}
                     <div class="clean">Clean <span class="glyphicon glyphicon-ok-sign"></span></div>
@@ -72,8 +74,7 @@
                         {{ formatTag('pmf', i)|safe }}
                     {% endfor %}
                 {% endif %}
-            </td>
-        </tr>
+            </td>-->
     </table>
 
     {% if session.get('can_vote') == file['sha256'] %}

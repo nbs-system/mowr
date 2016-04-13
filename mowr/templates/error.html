@@ -13,6 +13,8 @@
 <p class="error_nb">{{ num }}</p>
 {% if num == 404 %}
     <p>Sorry, this page could not be found.</p>
+{% elif num == 405 %}
+    <p>The method is not allowed for the requested URL.</p>
 {% elif num == 500 %}
     <p>Sorry, there was an error while processing your request.</p>
 {% else %}
