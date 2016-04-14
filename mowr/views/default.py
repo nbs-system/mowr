@@ -119,4 +119,4 @@ def vote(sha256, mode):
 
 @default.route('/')
 def index():
-    return render_template('index.html', file_types=current_app.config.get('FILETYPES'))
+    return render_template('index.html', file_types=current_app.config.get('FILE_TYPES'))

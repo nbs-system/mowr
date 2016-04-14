@@ -24,48 +24,24 @@ class Analyser:
 
     @staticmethod
     def check_type(type):
-        types = current_app.config.get('FILETYPES')
+        """ Check the analysis type """
+        types = current_app.config.get('FILE_TYPES')
         return type if type in types else types[0]
 
     def analyse(self):
-        #TODO Refactor this function too ugly
         """ Analyse a file and store the analysis result in the database """
         # Make sure the file exists and is readable
         if not access(self.file, R_OK):
             flash('There was an error while trying to analyse the file.', 'danger')
             return False
 
-        # Check if it is a new sample or not
-        if not self.getsample():
-            # New sample so compute hashes
-            with open(self.file, 'rb') as f:
-                buf = f.read()
-            sha256sum = hashlib.sha256(buf).hexdigest()
-            if sha256sum != self.sha256:
-                print("Sorry but it seems the hash I got is different from the one I computed !")
-            self.sha256 = sha256sum
-            md5sum = hashlib.md5(buf).hexdigest()
-            ssdeephash = ssdeep.hash(buf)
-            mime = magic.from_buffer(buf, mime=True).decode('utf-8')
-
-        # Start time counter
-        start = time()
-
         # Cut filename
         filename = self.filename[:75]
 
         # Start the analysis
-        # TODO yara bindings ?
-        if self.type == 'ASP':
-            pmf = subprocess.check_output([current_app.config['PMF_BIN'], '-l', 'asp', self.file])
-            pmf = [v for i, v in list(enumerate(pmf.decode('utf-8').split())) if i % 2 == 0]
-        else:
-            pmf = subprocess.check_output([current_app.config['PMF_BIN'], self.file])
-            pmf = [v for i, v in list(enumerate(pmf.decode('utf-8').split())) if i % 2 == 0]
-
-        # End time counter
-        end = time()
-        analysis_time = end-start
+        start = time()
+        pmf = self.do_analyse()
+        analysis_time = time() - start
 
         # Create analysis embedded document
         analysis = Analysis(
@@ -75,6 +51,9 @@ class Analyser:
         )
 
         if not self.getsample():
+            # If new sample, compute its hashes
+            (sha256sum, md5sum, ssdeephash, mime) = self.compute_sample()
+            # If new sample insert it
             sample = Sample(
                 first_analysis=datetime.utcnow(),
                 last_analysis=datetime.utcnow(),
@@ -89,8 +68,10 @@ class Analyser:
             sample.analyzes.append(analysis)
             sample.save()
         else:
+            # If not update the sample information
             sample = Sample.objects(sha256=self.sha256).first()
             updated = False
+
             # Update already existing analysis
             for anal in sample.analyzes:
                 if anal.type == analysis.type:
@@ -109,6 +90,30 @@ class Analyser:
         # Allow the user to vote for his sample
         session['can_vote'] = self.sha256
         return True
+
+    def compute_sample(self):
+        """ Compute everything related to the file itself """
+        with open(self.file, 'rb') as f:
+            buf = f.read()
+        sha256sum = hashlib.sha256(buf).hexdigest()
+        if sha256sum != self.sha256:
+            print("Sorry but it seems the hash I got is different from the one I computed !")
+        self.sha256 = sha256sum
+        md5sum = hashlib.md5(buf).hexdigest()
+        ssdeephash = ssdeep.hash(buf)
+        mime = magic.from_buffer(buf, mime=True).decode('utf-8')
+        return sha256sum, md5sum, ssdeephash, mime
+
+    def do_analyse(self):
+        """ Analyse the file with PMF """
+        # TODO Yara bindings !
+        if self.type == 'ASP':
+            pmf = subprocess.check_output([current_app.config['PMF_BIN'], '-l', 'asp', self.file])
+            pmf = [v for i, v in list(enumerate(pmf.decode('utf-8').split())) if i % 2 == 0]
+        else:
+            pmf = subprocess.check_output([current_app.config['PMF_BIN'], self.file])
+            pmf = [v for i, v in list(enumerate(pmf.decode('utf-8').split())) if i % 2 == 0]
+        return pmf
 
     def getsample(self):
         """ Return the Sample object (database row) """

@@ -28,6 +28,12 @@ def create_app(config_filename=''):
             print("%s is not writable. Please update the configuration (UPLOAD_FOLDER)." % app.config['UPLOAD_FOLDER'])
             exit(1)
 
+    # Make sure the analysis types are ok
+    if app.config.get('FILE_TYPES') is None or len(app.config.get('FILE_TYPES')) == 0:
+        print("Analysis types seems wrong (%s). Please update your configuration (UPLOAD_FOLDER)." % app.config[
+            'FILE_TYPES'])
+        exit(1)
+
     from mowr.views import default
     from mowr.views import admin
     app.register_blueprint(default.default)
