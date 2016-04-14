@@ -21,3 +21,4 @@ class Sample(Document):
     vote_malicious = IntField(default=0)
     mime = StringField(max_length=25)
     analyzes = EmbeddedDocumentListField(Analysis)
+    tags = ListField(StringField(max_length=25))

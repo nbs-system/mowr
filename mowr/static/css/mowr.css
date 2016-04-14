@@ -85,3 +85,8 @@ body {
 .gauge canvas {
     width: 150px;
 }
+
+.td_add {
+    text-align: right;
+    margin-left: 10px;
+}

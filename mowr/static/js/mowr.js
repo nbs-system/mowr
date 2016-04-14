@@ -62,3 +62,21 @@ function vote(sha256, type) {
     }})
 }
 
+function showTagForm() {
+    $("#tagform")[0].hidden = null;
+}
+
+function hideTagForm() {
+    $("#tagform")[0].hidden = 'hidden';
+}
+
+function submitTag() {
+    var tag = $("#tagtoadd")[0].value;
+    var sha256 = $("#sha256")[0].innerHTML;
+
+    $.ajax({url: "/tag/submit/" + sha256 + "/" + tag, success: function(result) {
+        if (result === "OK") {
+            hideTagForm();
+        }
+    }})
+}

@@ -13,9 +13,9 @@ def tagnameToColor(tag):
     return choice(['primary', 'danger', 'success', 'default', 'warning'])
 
 
-def formatTag(soft, tag):
-    return '<a class="label label-' + tagnameToColor(tag) + '" href="' + url_for('default.tag', soft=soft,
-                                                                                 tag=tag) + '">' + tag + '</a>'
+# TODO Put it as global instead of passing it to the view
+def formatTag(tag):
+    return '<a class="label label-' + tagnameToColor(tag) + '" href="' + url_for('default.tag', tag=tag) + '">' + tag + '</a>'
 
 
 @default.route('/upload', methods=['POST'])
@@ -88,7 +88,7 @@ def analysis(type, sha256):
     f = analyser.getsample()
     if f is None:
         abort(404)
-    return render_template('result.html', file=f, formatTag=formatTag, type=type)
+    return render_template('result.html', file=f, formatTag=formatTag, type=type, tag_list=current_app.config.get('TAG_LIST'))
 
 
 @default.route('/analyse/<type>/<sha256>', methods=['GET', 'POST'])
@@ -98,13 +98,21 @@ def reanalyse(type, sha256):
     return redirect(url_for('default.analysis', sha256=sha256, type=type))
 
 
-@default.route('/tag/<soft>/<tag>')
-def tag(soft, tag):
-    if soft == 'pmf':
-        l = Sample.objects(pmf_analysis=tag)
-        return render_template('tag.html', files=l, formatTag=formatTag)
-    else:
-        abort(404)
+@default.route('/tag/<tag>')
+def tag(tag):
+    l = Sample.objects(tags=tag)
+    return render_template('tag.html', files=l, formatTag=formatTag)
+
+
+@default.route('/tag/submit/<sha256>/<tag>')
+def submit_tag(sha256, tag):
+    if tag is None or tag not in current_app.config.get('TAG_LIST'):
+        return "NOK"
+    f = Sample.objects(sha256=sha256).first()
+    if f is None or tag in f.tags:
+        return "NOK"
+    f.update(add_to_set__tags=tag)
+    return "OK"
 
 
 @default.route('/vote/<sha256>/<mode>')
