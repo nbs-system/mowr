@@ -15,7 +15,8 @@ def tagnameToColor(tag):
 
 # TODO Put it as global instead of passing it to the view
 def formatTag(tag):
-    return '<a class="label label-' + tagnameToColor(tag) + '" href="' + url_for('default.tag', tag=tag) + '">' + tag + '</a>'
+    return '<a class="label label-' + tagnameToColor(tag) + '" href="' + url_for('default.tag',
+                                                                                 tag=tag) + '">' + tag + '</a>'
 
 
 @default.route('/upload', methods=['POST'])
@@ -60,17 +61,6 @@ def upload():
     return redirect(url_for('default.analysis', sha256=sha256sum, type=type))
 
 
-@default.route('/sample/<type>/<sha256>')
-def sample_exists(type, sha256):
-    """ Returns OK if the file has already been analysed """
-    sample = Sample.objects(sha256=sha256).first()
-    if sample is not None:
-        for analysis in sample.analyzes:
-            if analysis.type == type:
-                return "OK"
-    return "NOK"
-
-
 @default.route('/choose/<type>/<sha256>', methods=['GET', 'POST'])
 def choose(type, sha256):
     # Save filename
@@ -88,7 +78,8 @@ def analysis(type, sha256):
     f = analyser.getsample()
     if f is None:
         abort(404)
-    return render_template('result.html', file=f, formatTag=formatTag, type=type, tag_list=current_app.config.get('TAG_LIST'))
+    return render_template('result.html', file=f, formatTag=formatTag, type=type,
+                           tag_list=current_app.config.get('TAG_LIST'))
 
 
 @default.route('/analyse/<type>/<sha256>', methods=['GET', 'POST'])
@@ -102,6 +93,22 @@ def reanalyse(type, sha256):
 def tag(tag):
     l = Sample.objects(tags=tag)
     return render_template('tag.html', files=l, formatTag=formatTag)
+
+
+@default.route('/documentation')
+def documentation():
+    return render_template('documentation.html')
+
+
+@default.route('/sample/<type>/<sha256>')
+def sample_exists(type, sha256):
+    """ Returns OK if the file has already been analysed """
+    sample = Sample.objects(sha256=sha256).first()
+    if sample is not None:
+        for analysis in sample.analyzes:
+            if analysis.type == type:
+                return "OK"
+    return "NOK"
 
 
 @default.route('/tag/submit/<sha256>/<tag>')

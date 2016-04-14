@@ -83,13 +83,13 @@ def getstats():
     # Count samples in the database
     samplesNb = Sample.objects.count()
     # Get clean and malicious files
-    clean = Sample.objects(vote_clean__gte=1).count() #TODO
+    clean = Sample.objects(vote_clean__gte=1).count()  # TODO
     malicious = samplesNb - clean
     # Get average time
     # TODO
     average_time = Sample.objects.average('analyzes.analysis_time')
-    average_time *= 1000 # To milliseconds
-    average_time = '%.3f' % average_time # Truncate
+    average_time *= 1000  # To milliseconds
+    average_time = '%.3f' % average_time  # Truncate
 
     samples = dict(
         nb=samplesNb,
