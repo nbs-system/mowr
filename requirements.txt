@@ -1,4 +1,3 @@
-magic
 ssdeep
 python-magic
 Flask

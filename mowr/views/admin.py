@@ -1,5 +1,6 @@
 from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
 from mowr.model.db import Sample
+from mowr.model.analyser import Analyser
 from datetime import datetime
 import six
 import os
@@ -63,6 +64,18 @@ def searchpage(query, formated=None):
         return render_template('admin/search_result.html', search=s)
     return str(s)
 
+
+@admin.route('/delete/<sha256>')
+def delete(sha256):
+    """ Delete a sample from harddrive and database """
+    if 'login' not in session:
+        return redirect(url_for('admin.login'))
+    elif session.get('login') == current_app.config['ADMIN_LOGIN'] and search(sha256):
+        Sample.objects(sha256=sha256).first().delete()
+        os.remove(Analyser.getfilepath(sha256))
+        flash('The file %s has been deleted. Are you happy now ?' % sha256, 'warning')
+        return redirect(url_for('admin.samples'))
+    abort(404)
 
 def getstats():
     """ Returns a dict containing statistics """

@@ -45,6 +45,14 @@
 <body class="nav-md">
 <div class="container body">
     <div class="main_container">
+        <!-- Flash message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         {% include "admin/sidebar.html" %}
 
         <!-- page content -->
