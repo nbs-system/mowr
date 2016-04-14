@@ -15,7 +15,7 @@ env:
 
 install: 
   - "pip install -r requirements.txt"
-  - "git clone https://github.com/plusvic/yara && cd ./yara && ./bootstrap.sh && ./configure && make"
+  - "git clone https://github.com/plusvic/yara && cd ./yara && ./bootstrap.sh && ./configure && make && cd ../"
 
 services: mongodb
 

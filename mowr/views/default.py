@@ -4,6 +4,7 @@ from mowr.model.analyser import Analyser
 from mowr.model.db import Sample
 from random import choice
 from os import chmod
+import datetime
 
 default = Blueprint('default', __name__)
 
@@ -78,8 +79,10 @@ def analysis(type, sha256):
     f = analyser.getsample()
     if f is None:
         abort(404)
+    diff = datetime.datetime.utcnow() - f.last_analysis
+    suggest_reanalyse = diff > datetime.timedelta(days=90)
     return render_template('result.html', file=f, formatTag=formatTag, type=type,
-                           tag_list=current_app.config.get('TAG_LIST'))
+                           tag_list=current_app.config.get('TAG_LIST'), reanalyse=suggest_reanalyse)
 
 
 @default.route('/analyse/<type>/<sha256>', methods=['GET', 'POST'])

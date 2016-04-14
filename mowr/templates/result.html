@@ -18,6 +18,9 @@
             </div>
         </div>
     {% endif %}
+    {% if reanalyse %}
+        <div class="alert alert-info">This file has been last analysed a long time ago. Do you want to <a href="{{ url_for('default.reanalyse', sha256=file['sha256'], type=type) }}">reanalyse it</a> ?</div>
+    {% endif %}
     <table class="table table-bordered">
         <tr>
             <td colspan="2" class="active">File informations</td>

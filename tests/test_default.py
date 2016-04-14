@@ -18,7 +18,6 @@ class DefaultTestCase(unittest.TestCase):
             if len(f) == 64:
                 os.remove('{0}/{1}'.format(app.config['UPLOAD_FOLDER'], f))
 
-
     def test_upload(self):
         """ Test upload form """
         # Upload without any file
