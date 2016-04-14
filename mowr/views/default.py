@@ -81,6 +81,9 @@ def choose(type, sha256):
 
 @default.route('/analysis/<type>/<sha256>')
 def analysis(type, sha256):
+    if type is None or type == 'any':
+        # TODO Get most revelant analysis to show
+        return redirect(url_for('default.analysis', sha256=sha256, type=current_app.config.get('FILE_TYPES')[0]))
     analyser = Analyser(sha256=sha256, type=type)
     f = analyser.getsample()
     if f is None:

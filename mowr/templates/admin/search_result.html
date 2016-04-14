@@ -10,8 +10,8 @@
     <tbody>
     {% for s in search %}
         <tr>
-            <td><a href="{{ url_for('default.analysis', sha256=s.sha256, type='PHP') }}">{{ s.name[0] }}</a></td>
-            <td><a href="{{ url_for('default.analysis', sha256=s.sha256, type='PHP') }}">{{ s.sha256 }}</a></td>
+            <td><a href="{{ url_for('default.analysis', sha256=s.sha256, type='any') }}">{{ s.name[0] }}</a></td>
+            <td><a href="{{ url_for('default.analysis', sha256=s.sha256, type='any') }}">{{ s.sha256 }}</a></td>
             <td>{{ s.first_analysis }}</td>
             <td>{{ s.last_analysis }}</td>
         </tr>

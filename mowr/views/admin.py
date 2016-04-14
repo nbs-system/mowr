@@ -37,6 +37,7 @@ def login():
 
 @admin.route('/logout')
 def logout():
+    """ Log the user out """
     session.pop('login', None)
     return redirect(url_for('default.index'))
 
@@ -65,7 +66,7 @@ def searchpage(query, formated=None):
 
 def getstats():
     """ Returns a dict containing statistics """
-    ## Samples infos
+    # Samples infos
     # Count samples in the database
     samplesNb = Sample.objects.count()
     # Get clean and malicious files
@@ -73,8 +74,7 @@ def getstats():
     malicious = samplesNb - clean
     # Get average time
     # TODO
-    #average_time = Sample.objects.average('analysis_time')
-    average_time = 0.001234
+    average_time = Sample.objects.average('analyzes.analysis_time')
     average_time *= 1000 # To milliseconds
     average_time = '%.3f' % average_time # Truncate
 
@@ -85,7 +85,7 @@ def getstats():
         average_time=average_time
     )
 
-    ## Disk usage
+    # Disk usage
     # Count the samples size
     file_size = sum(os.path.getsize('{0}/{1}'.format(current_app.config['UPLOAD_FOLDER'], f)) for f in
                     os.listdir(current_app.config['UPLOAD_FOLDER']))
@@ -98,7 +98,7 @@ def getstats():
         remaining_storage=remaining_storage
     )
 
-    ## Graph 1
+    # Graph 1
     # Last 7 days dates from oldest to newest
     if six.PY2:
         dateList = list(reversed(
@@ -120,7 +120,7 @@ def getstats():
         data2=[0] * 7
     )
 
-    ## File types
+    # File types
     # Get mime types from database
     rates = Sample.objects.item_frequencies('mime')
     stats = [v for i, v in rates.items()]
