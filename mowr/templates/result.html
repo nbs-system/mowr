@@ -59,22 +59,16 @@
         </tr>
         {% for analysis in file['analyzes'] %}
             {% if analysis.type == type %}
-            <tr>
-            <td>{{ analysis.soft }}</td>
-            <td>{{ analysis.result }} | {{ analysis.analysis_time }}</td>
-            </tr>
+                <tr>
+                    <td>PMF</td>
+                    {% if analysis.pmf_result|length == 0 %}
+                        <td><div class="clean">Clean <span class="glyphicon glyphicon-ok-sign"></span></div></td>
+                    {% else %}
+                        <td>{{ analysis.pmf_result }}</td>
+                    {% endif %}
+                </tr>
             {% endif %}
         {% endfor %}
-            <!--<td>PMF</td>
-            <td>
-                {% if file['pmf_analysis']|length == 0 %}
-                    <div class="clean">Clean <span class="glyphicon glyphicon-ok-sign"></span></div>
-                {% else %}
-                    {% for i in file['pmf_analysis'] %}
-                        {{ formatTag('pmf', i)|safe }}
-                    {% endfor %}
-                {% endif %}
-            </td>-->
     </table>
 
     {% if session.get('can_vote') == file['sha256'] %}

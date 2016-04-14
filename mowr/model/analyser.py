@@ -69,10 +69,9 @@ class Analyser:
 
         # Create analysis embedded document
         analysis = Analysis(
-            soft='PMF',
             analysis_time=analysis_time,
             type=self.type,
-            result=pmf
+            pmf_result=pmf
         )
 
         if not self.getsample():
@@ -94,9 +93,9 @@ class Analyser:
             updated = False
             # Update already existing analysis
             for anal in sample.analyzes:
-                if anal.type == analysis.type and anal.soft == analysis.soft:
-                    a = sample.analyzes.filter(soft=analysis.soft, type=analysis.type).first()
-                    a.result = analysis.result
+                if anal.type == analysis.type:
+                    a = sample.analyzes.filter(type=analysis.type).first()
+                    a.pmf_result = analysis.pmf_result
                     a.analysis_time = analysis.analysis_time
                     sample.save()
                     updated = True

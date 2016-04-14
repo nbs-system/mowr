@@ -5,10 +5,9 @@ from mongoengine import StringField, ListField, IntField, DateTimeField, FloatFi
 
 
 class Analysis(EmbeddedDocument):
-    soft = StringField(max_length=10, unique_with='type')
     type = StringField(max_length=5, unique=True)
     analysis_time = FloatField(default=0)
-    result = ListField()
+    pmf_result = ListField()
 
 
 class Sample(Document):
