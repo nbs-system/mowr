@@ -54,14 +54,15 @@ class Analyser:
 
         if not self.getsample():
             # If new sample, compute its hashes
-            (sha256sum, md5sum, ssdeephash, mime, entropy) = self.compute_sample()
+            (sha256sum, sha1, md5sum, ssdeephash, mime, entropy) = self.compute_sample()
             # If new sample insert it
             sample = Sample(
                 first_analysis=datetime.utcnow(),
                 last_analysis=datetime.utcnow(),
                 name=[filename],
                 md5=md5sum,
-                sha256=self.sha256,
+                sha1=sha1,
+                sha256=sha256sum,
                 ssdeep=ssdeephash,
                 vote_clean=0,
                 vote_malicious=0,
@@ -102,11 +103,12 @@ class Analyser:
         if sha256sum != self.sha256:
             print("Sorry but it seems the hash I got is different from the one I computed !")
         self.sha256 = sha256sum
+        sha1 = hashlib.sha1(buf).hexdigest()
         md5sum = hashlib.md5(buf).hexdigest()
         ssdeephash = ssdeep.hash(buf)
         mime = magic.from_buffer(buf, mime=True).decode('utf-8')
         entropy = self.entropy(buf)
-        return sha256sum, md5sum, ssdeephash, mime, entropy
+        return sha256sum, sha1, md5sum, ssdeephash, mime, entropy
 
     def do_analyse(self):
         """ Analyse the file with PMF """

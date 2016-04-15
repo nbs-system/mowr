@@ -8,7 +8,7 @@ function redirect_by_post(purl, pparameters, in_new_tab) {
     if (in_new_tab) {
         $(form).attr("target", "_blank");
     }
-    $.each(pparameters, function(key) {
+    $.each(pparameters, function (key) {
         $(form).append('<input type="text" name="' + key + '" value="' + this + '" />');
     });
     document.body.appendChild(form);
@@ -26,21 +26,23 @@ function hashFile() {
 
     var reader = new FileReader();
 
-    reader.onload = function() {
+    reader.onload = function () {
         var sha256 = CryptoJS.SHA256(reader.result);
         var type = $("#select_type")[0].value;
-        $.ajax({url: '/sample/' + type + '/' + sha256, success: function(result) {
-            if (result === "NOK") {
-                // Upload the file
-                $("#dropzone").submit();
-            } else {
-                // Do not upload the file but post filename
-                redirect_by_post('/choose/' + type + '/' + sha256, {filename: filename}, false)
+        $.ajax({
+            url: '/sample/' + type + '/' + sha256, success: function (result) {
+                if (result === "NOK") {
+                    // Upload the file
+                    $("#dropzone").submit();
+                } else {
+                    // Do not upload the file but post filename
+                    redirect_by_post('/choose/' + type + '/' + sha256, {filename: filename}, false)
+                }
             }
-        }})
+        })
     };
 
-    reader.onerror = function() {
+    reader.onerror = function () {
         console.error("Could not read the file.");
     };
 
@@ -54,12 +56,19 @@ function vote(sha256, type) {
         buttons[i].disabled = "disabled";
     }
 
-    $.ajax({url: "/vote/" + sha256 + "/" + type, success: function(result) {
-        if (result === "OK") {
-            // Replace the vote div
-            vote_div.replaceWith('<div class="alert alert-success alert-small">Thank you !</div>');
+    $.ajax({
+        url: "/vote/" + sha256 + "/" + type, success: function (result) {
+            if (result === "OK") {
+                if (type == 'clean') {
+                    n = -1;
+                } else {
+                    n = 1;
+                }
+                // gauge is already set if we are on the right page
+                gauge.set(gauge.value + n);
+            }
         }
-    }})
+    })
 }
 
 function showTagForm() {
@@ -74,9 +83,11 @@ function submitTag() {
     var tag = $("#tagtoadd")[0].value;
     var sha256 = $("#sha256")[0].innerHTML;
 
-    $.ajax({url: "/tag/submit/" + sha256 + "/" + tag, success: function(result) {
-        if (result === "OK") {
-            hideTagForm();
+    $.ajax({
+        url: "/tag/submit/" + sha256 + "/" + tag, success: function (result) {
+            if (result === "OK") {
+                hideTagForm();
+            }
         }
-    }})
+    })
 }
