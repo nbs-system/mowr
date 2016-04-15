@@ -111,7 +111,6 @@ class Analyser:
     def do_analyse(self):
         """ Analyse the file with PMF """
         rule_file = '{path}/{rule}.yara'.format(path=current_app.config.get('PMF_PATH'), rule=self.type.lower())
-        print(rule_file)
         rules = yara.compile(rule_file)
         with open(self.file, 'rb') as f:
             matches = rules.match(data=f.read())
