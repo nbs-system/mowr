@@ -70,16 +70,23 @@ body {
     display: block;
 }
 
-.vote_malicious {
+#vote_malicious {
     display: inline;
     color: #D10000;
-    margin-right: 65px;
+    margin-left: 120px;
 }
 
-.vote_clean {
+#vote_clean {
     display: inline;
     color: #10C778;
-    margin-left: 65px;
+}
+
+#ratio-textfield {
+    z-index: 5;
+    font-size: 40px;
+    left: 80px;
+    bottom: 10px;
+    position: absolute;
 }
 
 .gauge canvas {

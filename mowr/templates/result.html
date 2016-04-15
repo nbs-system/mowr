@@ -1,28 +1,26 @@
 {% extends "layout.html" %}
 {% set vote = file['vote_malicious'] + file['vote_clean'] %}
 {% block content %}
-    {% if file['vote_clean']|int > 0 or file['vote_malicious']|int > 0 %}
-        <div class="row">
-            <div class="col-lg-9 col-sm-9 col-xs-2">
-                <h2>Analysis:</h2>
-            </div>
-            <div class="col-lg-3 col-sm-3 col-xs-10">
-                <span class="center">Users ratio: {{ '{:,.3f}'.format(file['vote_malicious']*100/vote) }}%</span>
-                <div class="gauge">
-                    <canvas id="gauge-ratio"></canvas>
-                    <div class="vote">
-                        <div class="vote_malicious">{{ file['vote_malicious'] }}</div>
-                        <div class="vote_clean">{{ file['vote_clean'] }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
     {% if reanalyse %}
         <div class="alert alert-info">This file has been last analysed a long time ago. Do you want to <a
                 href="{{ url_for('default.reanalyse', sha256=file['sha256'], type=type) }}">reanalyse it</a> ?
         </div>
     {% endif %}
+    <div class="row">
+        <div class="col-lg-9 col-sm-9 col-xs-2">
+            <h2>Analysis:</h2>
+        </div>
+        <div class="col-lg-3 col-sm-3 col-xs-10">
+            <div class="gauge">
+                <canvas id="canvas-ratio"></canvas>
+                <div id="ratio-textfield" style="font-size: 24px;">1</div>
+                <div class="vote">
+                    <a href="#" id="vote_clean" onclick="vote('{{ file['sha256'] }}', 'malicious')"><i class="glyphicon glyphicon-check"></i></a>
+                    <a href="#" id="vote_malicious" onclick="vote('{{ file['sha256'] }}', 'clean')"><i class="glyphicon glyphicon-alert"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
     <table class="table table-bordered">
         <tr>
             <td colspan="2" class="active">File informations</td>
@@ -103,41 +101,34 @@
         {% endfor %}
     </table>
 
-    {% if session.get('can_vote') == file['sha256'] %}
-        <div class="alert" id="vote">
-            What do you think about this file ?
-            <button class="btn btn-success btn-xs" onclick="vote('{{ file['sha256'] }}', 'clean')">Clean</button>
-            <button class="btn btn-danger btn-xs" onclick="vote('{{ file['sha256'] }}', 'malicious')">Malicious</button>
-        </div>
-    {% endif %}
     <div class="container">
         <a href="{{ url_for('default.index') }}"><span class="btn btn-info">Upload a new file</span></a>
     </div>
 {% endblock %}
 {% block script %}
-    {% if file['vote_clean']|int > 0 or file['vote_malicious']|int > 0 %}
-        <script src="{{ url_for('static', filename='js/gauge.min.js') }}"></script>
-        <script>
-            var opts = {
-                lines: 12, // The number of lines to draw
-                angle: 0, // The length of each line
-                lineWidth: 0.2, // The line thickness
-                pointer: {
-                    length: 0.51, // The radius of the inner circle
-                    strokeWidth: 0.033, // The rotation offset
-                    color: '#000000' // Fill color
-                },
-                limitMax: 'false',   // If true, the pointer will not go past the end of the gauge
-                colorStart: '#690202',   // Colors
-                colorStop: '#D10000',    // just experiment with them
-                strokeColor: '#10C778',   // to see which ones work best for you
-                generateGradient: true
-            };
-            var target = document.getElementById('gauge-ratio'); // your canvas element
-            var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
-            gauge.maxValue = {{ vote }}; // set max gauge value
-            gauge.animationSpeed = 27; // set animation speed (32 is default value)
-            gauge.set({{ file['vote_malicious'] }}); // set actual value
-        </script>
-    {% endif %}
+    <script src="{{ url_for('static', filename='js/gauge.min.js') }}"></script>
+    <script>
+        var opts = {
+            lines: 12, // The number of lines to draw
+            angle: 0, // The length of each line
+            lineWidth: 0.2, // The line thickness
+            pointer: {
+                length: 0, // The radius of the inner circle
+                strokeWidth: 0, // The rotation offset
+                color: '#000000' // Fill color
+            },
+            limitMax: 'false',   // If true, the pointer will not go past the end of the gauge
+            colorStart: '#690202',   // Colors
+            colorStop: '#10C778',    // just experiment with them
+            strokeColor: '#D10000',   // to see which ones work best for you
+            generateGradient: true
+        };
+        var target = document.getElementById('canvas-ratio'); // your canvas element
+        var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+        gauge.minValue = {{ -10 }};
+        gauge.maxValue = {{ 10 }}; // set max gauge value
+        gauge.animationSpeed = 27; // set animation speed (32 is default value)
+        gauge.set({{ file['vote_malicious'] - file['vote_clean'] }}); // set actual value
+        gauge.setTextField(document.getElementById("ratio-textfield"))
+    </script>
 {% endblock %}

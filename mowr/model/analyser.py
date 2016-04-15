@@ -109,7 +109,7 @@ class Analyser:
         rule_file = '{path}/{rule}.yara'.format(path=current_app.config.get('PMF_PATH'), rule=self.type.lower())
         print(rule_file)
         rules = yara.compile(rule_file)
-        with open(self.file, 'r') as f:
+        with open(self.file, 'rb') as f:
             matches = rules.match(data=f.read())
         return [str(m) for m in matches]
 
