@@ -13,11 +13,11 @@ def create_app(config_filename=''):
     app.db = MongoEngine(app)
 
     # Check PMF Path
-    pmf_default_path = 'php-malware-finder/php-malware-finder/phpmalwarefinder'
+    pmf_default_path = 'php-malware-finder/php-malware-finder'
     if os.access(pmf_default_path, os.R_OK):
-        app.config['PMF_BIN'] = pmf_default_path
-    elif not os.access(app.config['PMF_BIN'], os.R_OK):
-        print("Cannot access PMF binary. Please clone the repository in the root folder or update the configuration (PMF_BIN).")
+        app.config['PMF_PATH'] = pmf_default_path
+    elif not os.access(app.config['PMF_PATH'], os.R_OK):
+        print("Cannot access PMF binary. Please clone the repository in the root folder or update the configuration (PMF_PATH).")
         exit(1)
 
     # Check upload folder access

@@ -1,4 +1,3 @@
-import subprocess
 from datetime import datetime
 import hashlib
 import ssdeep
@@ -8,6 +7,7 @@ from mowr.model.db import Sample, Analysis
 from time import time
 from werkzeug.utils import secure_filename
 import magic
+import yara
 
 
 class Analyser:
@@ -106,14 +106,12 @@ class Analyser:
 
     def do_analyse(self):
         """ Analyse the file with PMF """
-        # TODO Yara bindings !
-        if self.type == 'ASP':
-            pmf = subprocess.check_output([current_app.config['PMF_BIN'], '-l', 'asp', self.file])
-            pmf = [v for i, v in list(enumerate(pmf.decode('utf-8').split())) if i % 2 == 0]
-        else:
-            pmf = subprocess.check_output([current_app.config['PMF_BIN'], self.file])
-            pmf = [v for i, v in list(enumerate(pmf.decode('utf-8').split())) if i % 2 == 0]
-        return pmf
+        rule_file = '{path}/{rule}.yara'.format(path=current_app.config.get('PMF_PATH'), rule=self.type.lower())
+        print(rule_file)
+        rules = yara.compile(rule_file)
+        with open(self.file, 'r') as f:
+            matches = rules.match(data=f.read())
+        return [str(m) for m in matches]
 
     def getsample(self):
         """ Return the Sample object (database row) """

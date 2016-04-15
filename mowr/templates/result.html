@@ -19,7 +19,9 @@
         </div>
     {% endif %}
     {% if reanalyse %}
-        <div class="alert alert-info">This file has been last analysed a long time ago. Do you want to <a href="{{ url_for('default.reanalyse', sha256=file['sha256'], type=type) }}">reanalyse it</a> ?</div>
+        <div class="alert alert-info">This file has been last analysed a long time ago. Do you want to <a
+                href="{{ url_for('default.reanalyse', sha256=file['sha256'], type=type) }}">reanalyse it</a> ?
+        </div>
     {% endif %}
     <table class="table table-bordered">
         <tr>
@@ -60,21 +62,21 @@
             <td>Tags <a href="#" class="td_add" onclick="showTagForm()"><span
                     class="glyphicon glyphicon-plus-sign"></span></a></td>
             <td>{% for tag in file['tags'] %}
-                    {{ formatTag(tag)|safe }}
-                {% endfor %}
+                {{ formatTag(tag)|safe }}
+            {% endfor %}
             </td>
         </tr>
         <tr id="tagform" hidden="hidden">
             <td>Add a tag</td>
             <td>
-            <select id="tagtoadd">
-                <option>-- Choose a tag in the list --</option>
-                {% for tag in tag_list %}
-                    {% if tag not in file['tags'] %}
-                        <option value="{{ tag }}">{{ tag }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
+                <select title="Select a tag to add" id="tagtoadd">
+                    <option>-- Choose a tag in the list --</option>
+                    {% for tag in tag_list %}
+                        {% if tag not in file['tags'] %}
+                            <option value="{{ tag }}">{{ tag }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
                 <button class="btn btn-xs btn-success" onclick="submitTag()">Add</button>
             </td>
         </tr>
@@ -90,7 +92,11 @@
                             <div class="clean">Clean <span class="glyphicon glyphicon-ok-sign"></span></div>
                         </td>
                     {% else %}
-                        <td>{{ analysis.pmf_result }}</td>
+                        <td>
+                            {% for result in analysis.pmf_result %}
+                                {{ result }}
+                            {% endfor %}
+                        </td>
                     {% endif %}
                 </tr>
             {% endif %}
