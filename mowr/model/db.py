@@ -22,3 +22,4 @@ class Sample(Document):
     mime = StringField(max_length=25)
     analyzes = EmbeddedDocumentListField(Analysis)
     tags = ListField(StringField(max_length=25))
+    entropy = FloatField()

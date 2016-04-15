@@ -5,8 +5,10 @@ from flask import current_app, flash, session
 from os import access, R_OK
 from mowr.model.db import Sample, Analysis
 from time import time
+from collections import Counter
 from werkzeug.utils import secure_filename
 import magic
+import math
 import yara
 
 
@@ -52,7 +54,7 @@ class Analyser:
 
         if not self.getsample():
             # If new sample, compute its hashes
-            (sha256sum, md5sum, ssdeephash, mime) = self.compute_sample()
+            (sha256sum, md5sum, ssdeephash, mime, entropy) = self.compute_sample()
             # If new sample insert it
             sample = Sample(
                 first_analysis=datetime.utcnow(),
@@ -63,7 +65,8 @@ class Analyser:
                 ssdeep=ssdeephash,
                 vote_clean=0,
                 vote_malicious=0,
-                mime=mime
+                mime=mime,
+                entropy=entropy
             )
             sample.analyzes.append(analysis)
             sample.save()
@@ -102,7 +105,8 @@ class Analyser:
         md5sum = hashlib.md5(buf).hexdigest()
         ssdeephash = ssdeep.hash(buf)
         mime = magic.from_buffer(buf, mime=True).decode('utf-8')
-        return sha256sum, md5sum, ssdeephash, mime
+        entropy = self.entropy(buf)
+        return sha256sum, md5sum, ssdeephash, mime, entropy
 
     def do_analyse(self):
         """ Analyse the file with PMF """
@@ -121,3 +125,7 @@ class Analyser:
         """ Add a name to the sample in the database """
         if filename is not None:
             Sample.objects(sha256=self.sha256).first().update(add_to_set__name=filename)
+
+    def entropy(self, buf):
+        p, lns = Counter(buf), float(len(buf))
+        return -sum(count/lns * math.log(count/lns, 2) for count in p.values())
