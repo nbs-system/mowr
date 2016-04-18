@@ -91,11 +91,20 @@ def edit(sha256):
             mime = request.form.get('mime')
             first_analysis = request.form.get('first_analysis')
             last_analysis = request.form.get('last_analysis')
+            tags = request.form.get('tags').replace(' ', '').split(',')
             analyzes = []
             for analysis in sample.analyzes:
                 analysis.time = request.form.get(analysis.type + '_analysis_time').replace(' ', '')
                 analysis.pmf_result = request.form.get(analysis.type + '_pmf_result').replace(' ', '').split(',')
                 analyzes.append(analysis)
+
+            # Check inputs
+            for tag in tags:
+                if tag not in current_app.config.get('TAG_LIST'):
+                    flash('The tag %s is not in the allowed tags list.' % tag, 'error')
+                    return redirect(url_for('admin.edit', sha256=sha256))
+
+            # Update
             sample.update(
                 name=name,
                 mime=mime,
@@ -104,8 +113,9 @@ def edit(sha256):
                 analyzes=analyzes
             )
             return redirect(url_for('admin.samples'))
-        # Format name and analysis before rendering
+        # Format name, tags and analysis before rendering
         sample.name = ', '.join([name for name in sample.name])
+        sample.tags = ', '.join([tag for tag in sample.tags])
         for analysis in sample.analyzes:
             analysis.pmf_result = ', '.join([res for res in analysis.pmf_result])
         return render_template('admin/edit.html', sample=sample)

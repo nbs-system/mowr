@@ -22,6 +22,11 @@
                     <input id="last_analysis" type="text" name="last_analysis" class="form-control"
                            value="{{ sample.first_analysis }}">
                 </div>
+                <div class="form-group">
+                    <label for="tags">Tags</label>
+                    <input id="tags" type="text" name="tags" class="form-control"
+                           value="{{ sample.tags }}">
+                </div>
                 {% for analysis in sample.analyzes %}
                     <h3>{{ analysis.type }} Analysis</h3>
                     <div class="form-group">
