@@ -3,3 +3,4 @@ python-magic
 Flask
 Flask-MongoEngine
 yara
+python-dateutil

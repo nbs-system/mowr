@@ -1,7 +1,9 @@
 from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
 from mowr.model.db import Sample
 from mowr.model.analyser import Analyser
-from datetime import datetime
+from datetime import datetime, timedelta
+import dateutil.parser
+import re
 import six
 import os
 
@@ -202,9 +204,35 @@ def getstats():
 
 def search(query):
     """ Search for a sample matching query """
+    # Empty query ?
     if query is None:
         return ''
-    samples = Sample.objects(sha256__icontains=query)
+    # Check if prefix are used (Waoh so dirty)
+    prefix_list = ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']
+    if ':' in query:
+        elems = [elem.replace(' ', '') for elem in re.split('[:,]', query)]
+        prefixes = elems[::2]
+        prefixes = [pref for pref in prefixes if pref in prefix_list]
+        req = dict()
+        for prefix in prefixes:
+            try:
+                prefix_value = elems[elems.index(prefix)+1]
+            except IndexError:
+                continue
+            if prefix in ['first_analysis', 'last_analysis']:
+                date = dateutil.parser.parse(prefix_value)
+                n = '{prefix}__gte'.format(prefix=prefix)
+                req[n] = date
+                date += timedelta(days=1)
+                n = '{prefix}__lt'.format(prefix=prefix)
+                req[n] = date
+            else:
+                n = '{prefix}__icontains'.format(prefix=prefix)
+                req[n] = prefix_value
+        samples = Sample.objects.filter(**req)
+    else:
+        samples = Sample.objects(sha256__icontains=query)
+
     if not samples:
         samples = Sample.objects(name__icontains=query)
     if not samples:
