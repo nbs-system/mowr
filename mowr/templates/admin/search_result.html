@@ -5,17 +5,25 @@
         <td>SHA256</td>
         <td>First analysis</td>
         <td>Last analysis</td>
-        <td>Delete ?</td>
+        <td>Edit</td>
+        <td>Delete</td>
     </tr>
     </thead>
     <tbody>
-    {% for s in search %}
+    {% for sample in search %}
         <tr>
-            <td><a href="{{ url_for('default.analysis', sha256=s.sha256, type='any') }}">{{ s.name[0] }}</a></td>
-            <td><a href="{{ url_for('default.analysis', sha256=s.sha256, type='any') }}">{{ s.sha256 }}</a></td>
-            <td>{{ s.first_analysis }}</td>
-            <td>{{ s.last_analysis }}</td>
-            <td><a href="{{ url_for('admin.delete', sha256=s.sha256) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+            <td>
+                <a href="{{ url_for('default.analysis', sha256=sample.sha256, type='any') }}">{{ sample.name[0] }}</a>
+            </td>
+            <td>
+                <a href="{{ url_for('default.analysis', sha256=sample.sha256, type='any') }}">{{ sample.sha256 }}</a>
+            </td>
+            <td>{{ sample.first_analysis }}</td>
+            <td>{{ sample.last_analysis }}</td>
+            <td><a href="{{ url_for('admin.edit', sha256=sample.sha256) }}"><span
+                    class="glyphicon glyphicon-edit"></span></a></td>
+            <td><a href="{{ url_for('admin.delete', sha256=sample.sha256) }}"><span
+                    class="glyphicon glyphicon-trash"></span></a></td>
         </tr>
     {% endfor %}
     </tbody>

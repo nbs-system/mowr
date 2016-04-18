@@ -1,0 +1,44 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" action="{{ url_for('admin.edit', sha256=sample.sha256) }}">
+                <h2>Edit sample : {{ sample.sha256 }}</h2>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input id="name" type="text" name="name" class="form-control" value="{{ sample.name }}">
+                </div>
+                <div class="form-group">
+                    <label for="mime">MIME</label>
+                    <input id="mime" type="text" name="mime" class="form-control" value="{{ sample.mime }}">
+                </div>
+                <div class="form-group">
+                    <label for="first_analysis">First Analysis</label>
+                    <input id="first_analysis" type="text" name="first_analysis" class="form-control"
+                           value="{{ sample.first_analysis }}">
+                </div>
+                <div class="form-group">
+                    <label for="last_analysis">Last Analysis</label>
+                    <input id="last_analysis" type="text" name="last_analysis" class="form-control"
+                           value="{{ sample.first_analysis }}">
+                </div>
+                {% for analysis in sample.analyzes %}
+                    <h3>{{ analysis.type }} Analysis</h3>
+                    <div class="form-group">
+                        <label for="{{ analysis.type }}_analysis_time">Analysis time</label>
+                        <input id="{{ analysis.type }}_analysis_time" type="text"
+                               name="{{ analysis.type }}_analysis_time" class="form-control"
+                               value="{{ analysis.analysis_time }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ analysis.type }}_pmf_result">PMF Result</label>
+                        <input id="{{ analysis.type }}_pmf_result" type="text" name="{{ analysis.type }}_pmf_result"
+                               class="form-control"
+                               value="{{ analysis.pmf_result }}">
+                    </div>
+                {% endfor %}
+                <input class="btn btn-warning" type="submit" value="Edit">
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -77,6 +77,41 @@ def delete(sha256):
         return redirect(url_for('admin.samples'))
     abort(404)
 
+
+@admin.route('/edit/<sha256>', methods=['GET', 'POST'])
+def edit(sha256):
+    """ Edit a sample metadata """
+    if 'login' not in session:
+        return redirect(url_for('admin.login'))
+    elif session.get('login') == current_app.config['ADMIN_LOGIN'] and search(sha256):
+        sample = Sample.objects(sha256=sha256).first()
+        if request.method == 'POST':
+            # Reformat what is needed
+            name = request.form.get('name').replace(' ', '').split(',')
+            mime = request.form.get('mime')
+            first_analysis = request.form.get('first_analysis')
+            last_analysis = request.form.get('last_analysis')
+            analyzes = []
+            for analysis in sample.analyzes:
+                analysis.time = request.form.get(analysis.type + '_analysis_time').replace(' ', '')
+                analysis.pmf_result = request.form.get(analysis.type + '_pmf_result').replace(' ', '').split(',')
+                analyzes.append(analysis)
+            sample.update(
+                name=name,
+                mime=mime,
+                first_analysis=first_analysis,
+                last_analysis=last_analysis,
+                analyzes=analyzes
+            )
+            return redirect(url_for('admin.samples'))
+        # Format name and analysis before rendering
+        sample.name = ', '.join([name for name in sample.name])
+        for analysis in sample.analyzes:
+            analysis.pmf_result = ', '.join([res for res in analysis.pmf_result])
+        return render_template('admin/edit.html', sample=sample)
+    abort(404)
+
+
 def getstats():
     """ Returns a dict containing statistics """
     # Samples infos
