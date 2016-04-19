@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Search</h1>
+    <div class="input-group col-md-12">
+        <input type="text" id="search-samples" name="search" class="form-control input-lg"
+               placeholder="Search for hash, filename, ..." onblur="search_sample()"
+               onkeypress="search_sample()"/>
+        <span class="input-group-btn">
+            <label for="search-submit" class="btn btn-info btn-lg"><i
+                    class="glyphicon glyphicon-search"></i></label>
+            <input id="search-submit" type="submit" class="hidden" value="">
+        </span>
+    </div>
+    <br/>
+    <div class="row">
+        <div id="search-result">
+            {% include "search_result.html" %}
+        </div>
+    </div>
+{% endblock %}

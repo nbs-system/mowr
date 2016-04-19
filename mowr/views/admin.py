@@ -1,10 +1,8 @@
 from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
 from mowr.model.db import Sample
 from mowr.model.analyser import Analyser
-from datetime import datetime, timedelta
-import dateutil.parser
-import re
-import shlex
+from datetime import datetime
+from mowr.views.common import search
 import six
 import os
 
@@ -49,6 +47,7 @@ def logout():
 @admin.route('/samples', methods=['GET', 'POST'])
 def samples():
     """ Samples page """
+    # TODO Pagination
     if 'login' not in session:
         return redirect(url_for('admin.login'))
     elif session.get('login') == current_app.config['ADMIN_LOGIN']:
@@ -57,23 +56,12 @@ def samples():
     abort(404)
 
 
-@admin.route('/search/<query>/<formated>')
-def searchpage(query, formated=None):
-    """ API for searching (ajax) """
-    if 'login' not in session:
-        abort(404)
-    s = search(query)
-    if formated is not None:
-        return render_template('admin/search_result.html', search=s)
-    return str(s)
-
-
 @admin.route('/delete/<sha256>')
 def delete(sha256):
     """ Delete a sample from harddrive and database """
     if 'login' not in session:
         return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN'] and search(sha256):
+    elif session.get('login') == current_app.config['ADMIN_LOGIN'] and Sample.objects(sha256=sha256).first():
         Sample.objects(sha256=sha256).first().delete()
         os.remove(Analyser.getfilepath(sha256))
         flash('The file %s has been deleted. Are you happy now ?' % sha256, 'warning')
@@ -86,7 +74,7 @@ def edit(sha256):
     """ Edit a sample metadata """
     if 'login' not in session:
         return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN'] and search(sha256):
+    elif session.get('login') == current_app.config['ADMIN_LOGIN'] and Sample.objects(sha256=sha256).first():
         sample = Sample.objects(sha256=sha256).first()
         if request.method == 'POST':
             # Reformat what is needed
@@ -201,44 +189,3 @@ def getstats():
         diskUsage=diskUsage,
         fileType=fileType
     )
-
-
-def search(query):
-    """ Search for a sample matching query """
-    # Empty query ?
-    if query is None:
-        return ''
-    # Check if prefix are used (Waoh so dirty)
-    prefix_list = ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']
-    if ' ' in query:
-        elems = [elem for elem in shlex.split(query)]
-        prefixes = []
-        for i, elem in enumerate(elems):
-            if i % 2 == 0 and elem in prefix_list:
-                prefixes.append(elem)
-
-        req = dict()
-        for prefix in prefixes:
-            try:
-                prefix_value = elems[elems.index(prefix)+1]
-            except IndexError:
-                continue
-            if prefix in ['first_analysis', 'last_analysis']:
-                date = dateutil.parser.parse(prefix_value)
-                n = '{prefix}__gte'.format(prefix=prefix)
-                req[n] = date
-                date += timedelta(days=1)
-                n = '{prefix}__lt'.format(prefix=prefix)
-                req[n] = date
-            else:
-                n = '{prefix}__icontains'.format(prefix=prefix)
-                req[n] = prefix_value
-        samples = Sample.objects.filter(**req)
-    else:
-        samples = Sample.objects(sha256__icontains=query)
-
-    if not samples:
-        samples = Sample.objects(name__icontains=query)
-    if not samples:
-        return ''
-    return [samp for samp in samples]

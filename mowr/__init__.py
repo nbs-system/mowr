@@ -36,8 +36,10 @@ def create_app(config_filename=''):
 
     from mowr.views import default
     from mowr.views import admin
+    from mowr.views import common
     app.register_blueprint(default.default)
     app.register_blueprint(admin.admin)
+    app.register_blueprint(common.common)
 
     # Error handlers
     @app.errorhandler(404)

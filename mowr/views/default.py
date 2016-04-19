@@ -2,11 +2,12 @@ from hashlib import sha256
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app, session
 from mowr.model.analyser import Analyser
 from mowr.model.db import Sample
+from mowr.views.common import search
 from random import choice
 from os import chmod
 import datetime
 
-default = Blueprint('default', __name__)
+default = Blueprint('default', __name__, static_folder='../static', static_url_path='/static')
 
 
 # TODO
@@ -22,6 +23,7 @@ def formatTag(tag):
 
 @default.route('/upload', methods=['POST'])
 def upload():
+    """ Upload form """
     # Check file param
     file = request.files.get('file')
     if file is None:
@@ -64,6 +66,7 @@ def upload():
 
 @default.route('/choose/<type>/<sha256>', methods=['GET', 'POST'])
 def choose(type, sha256):
+    """ Choose page """
     # Save filename
     analyser = Analyser(sha256=sha256)
     analyser.addname(request.form.get("filename"))
@@ -72,6 +75,7 @@ def choose(type, sha256):
 
 @default.route('/analysis/<type>/<sha256>')
 def analysis(type, sha256):
+    """ Analysis result page """
     if type is None or type == 'any':
         # TODO Get most revelant analysis to show
         return redirect(url_for('default.analysis', sha256=sha256, type=current_app.config.get('FILE_TYPES')[0]))
@@ -87,6 +91,8 @@ def analysis(type, sha256):
 
 @default.route('/analyse/<type>/<sha256>', methods=['GET', 'POST'])
 def reanalyse(type, sha256):
+    """ Reanalyse a sample """
+    # TODO we should check for spamming users
     analyser = Analyser(sha256=sha256, type=type)
     analyser.analyse()
     return redirect(url_for('default.analysis', sha256=sha256, type=type))
@@ -94,13 +100,23 @@ def reanalyse(type, sha256):
 
 @default.route('/tag/<tag>')
 def tag(tag):
+    """ Tag page """
     l = Sample.objects(tags=tag)
     return render_template('tag.html', files=l, formatTag=formatTag)
 
 
 @default.route('/documentation')
 def documentation():
+    """ Documentation page """
     return render_template('documentation.html')
+
+
+@default.route('/search', methods=['GET', 'POST'])
+def search_page():
+    """ Search page """
+    # TODO Pagination
+    s = search(request.form.get('search'))  # Required to handle non javascript queries
+    return render_template('search.html', search=s)
 
 
 @default.route('/sample/<type>/<sha256>')

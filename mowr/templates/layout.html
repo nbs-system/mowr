@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('.static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="/static/css/mowr.css" rel="stylesheet">
+    <link href="{{ url_for('.static', filename='css/mowr.css') }}" rel="stylesheet">
     <title>MOWR</title>
 </head>
 
@@ -28,6 +28,7 @@
 
             <!-- Left nav -->
             <ul class="nav navbar-nav">
+                <li><a href="{{ url_for('default.search_page') }}">Search</a></li>
                 <li><a href="{{ url_for('default.documentation') }}">Documentation</a></li>
                 {% if session.get('login') != None %}
                     <li><a href="{{ url_for('admin.index') }}">Administration</a></li>
@@ -54,12 +55,13 @@
 </div>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="{{ url_for('default.static', filename='js/jquery.min.js') }}"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="/static/js/bootstrap.min.js"></script>
+<script src="{{ url_for('default.static', filename='js/bootstrap.min.js') }}"></script>
 <!-- Custom scripts -->
-<script src="/static/js/sha256.js"></script>
-<script src="/static/js/mowr.js"></script>
+<script src="{{ url_for('default.static', filename='js/sha256.js') }}"></script>
+<script src="{{ url_for('default.static', filename='js/mowr.js') }}"></script>
+<script src="{{ url_for('default.static', filename='js/common.js') }}"></script>
 {% block script %}
 {% endblock %}
 </body>
