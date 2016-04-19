@@ -1,3 +1,11 @@
+<div id="navigation">
+<a href="{{ url_for('admin.samples', page=samples.prev_num) }}" class="btn btn-primary"
+{% if not samples.has_prev %}style="visibility: hidden"{% endif %}>Previous</a>
+<a href="{{ url_for('admin.samples', page=samples.next_num) }}" class="btn btn-primary"
+{% if not samples.has_next %}style="visibility: hidden"{% endif %}>Next</a>
+Page: {{ samples.page }}
+</div>
+
 <table class="table table-striped">
     <thead>
     <tr>
@@ -11,7 +19,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for sample in search %}
+    {% for sample in samples.items %}
         <tr>
             <td>
                 <a href="{{ url_for('default.analysis', sha256=sample.sha256, type='any') }}">{{ sample.name[0] }}</a>

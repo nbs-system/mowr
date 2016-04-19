@@ -101,12 +101,14 @@ def documentation():
     return render_template('documentation.html')
 
 
-@default.route('/search', methods=['GET', 'POST'])
-def search_page():
+@default.route('/search', defaults={'page': 1}, methods=['GET', 'POST'])
+@default.route('/search/<page>', methods=['GET', 'POST'])
+def search_page(page):
     """ Search page """
-    # TODO Pagination
-    s = search(request.form.get('search'))  # Required to handle non javascript queries
-    return render_template('search.html', search=s)
+    page = int(page)
+    query = request.form.get('search')
+    samples = search(query, page)
+    return render_template('search.html', samples=samples)
 
 
 @default.route('/sample/<type>/<sha256>')

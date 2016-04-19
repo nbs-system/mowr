@@ -2,7 +2,7 @@
 {% block content %}
     <h1>Search</h1>
     <div class="input-group col-md-8">
-        <form method="post" action="{{ url_for('default.search_page') }}">
+        <form method="post" action="{{ url_for('default.search_page', page=1) }}">
             <div>
                 <div class="input-group col-md-12">
                     <input type="text" id="search-samples" name="search" class="form-control input-lg"

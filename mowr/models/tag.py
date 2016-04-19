@@ -1,5 +1,3 @@
-from random import choice
-
 from flask import url_for
 
 from mowr import db
@@ -8,6 +6,10 @@ tags = db.Table('tags',
                 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
                 db.Column('sample_sha256', db.String, db.ForeignKey('sample.sha256'))
                 )
+
+
+def get_tags_table():
+    return tags
 
 
 class Tag(db.Model):

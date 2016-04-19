@@ -47,15 +47,18 @@ def logout():
     return redirect(url_for('default.index'))
 
 
-@admin.route('/samples', methods=['GET', 'POST'])
-def samples():
+@admin.route('/samples', defaults={'page': 1}, methods=['GET', 'POST'])
+@admin.route('/samples/<page>', methods=['GET', 'POST'])
+def samples(page):
     """ Samples page """
     # TODO Pagination
     if 'login' not in session:
         return redirect(url_for('admin.login'))
     elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        s = search(request.form.get('search'))
-        return render_template('admin/samples.html', search=s)
+        page = int(page)
+        query = request.form.get('search')
+        samples = search(query, page)
+        return render_template('admin/samples.html', samples=samples)
     abort(404)
 
 
@@ -94,18 +97,22 @@ def edit(sha256):
             mime = request.form.get('mime')
             first_analysis = request.form.get('first_analysis')
             last_analysis = request.form.get('last_analysis')
-            tags = request.form.get('tags').replace(' ', '').split(',')
+            tag_input = request.form.get('tags').replace(' ', '').split(',')
             analyzes = []
             for analysis in sample.analyzes:
                 analysis.analysis_time = request.form.get(analysis.type + '_analysis_time').replace(' ', '')
                 analysis.result = request.form.get(analysis.type + '_pmf_result').replace(' ', '').split(',')
                 analyzes.append(analysis)
 
-            # # Check inputs
-            # for tag in tags:
-            #     if tag not in current_app.config.get('TAG_LIST'):
-            #         flash('The tag %s is not in the allowed tags list.' % tag, 'error')
-            #         return redirect(url_for('admin.edit', sha256=sha256))
+            # Check inputs
+            all_tags = Tag.get_all()
+            available_tags = [tag.name for tag in all_tags]
+            tag_list = []
+            for i, tag_name in enumerate(tag_input):
+                if tag_name not in available_tags:
+                    flash('The tag %s is not in the allowed tags list.' % tag_name, 'error')
+                    return redirect(url_for('admin.edit', sha256=sha256))
+                tag_list.append(all_tags[i])
 
             # Update
             sample.name = name
@@ -113,15 +120,11 @@ def edit(sha256):
             sample.first_analysis = first_analysis,
             sample.last_analysis = last_analysis,
             sample.analyzes = analyzes
+            sample.tags = tag_list
             db.session.add(sample)
             db.session.commit()
             return redirect(url_for('admin.samples'))
 
-        # Format name, tags and analysis before rendering
-        #sample.name = ', '.join([name for name in sample.name])
-        #sample.tags = ', '.join([tag for tag in sample.tags])
-        #for analysis in sample.analyzes:
-        #    analysis.result = ', '.join([res for res in analysis.pmf_result])
         return render_template('admin/edit.html', sample=sample)
     abort(404)
 
@@ -212,3 +215,4 @@ def getstats():
         diskUsage=diskUsage,
         fileType=fileType
     )
+

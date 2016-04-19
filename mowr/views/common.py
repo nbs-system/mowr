@@ -1,80 +1,75 @@
-import re
 import shlex
-from datetime import timedelta
-
 import dateutil.parser
-from flask import Blueprint, request, url_for, render_template
+import datetime
 
-from mowr.models.sample import Sample
 from mowr import db
+from mowr.models.sample import Sample
+from mowr.models.tag import Tag
+from mowr.models.tag import get_tags_table
 
-common = Blueprint('common', __name__, url_prefix='/common', static_folder='../static', static_url_path='/static')
-
-
-@common.route('/search/<query>/<formated>')
-def search_page(query, formated=None):
-    """ API for searching (ajax) """
-    # TODO Pagination
-    s = search(query)
-    if formated == 'f':
-        ref = request.referrer if request.referrer is not None else ''
-        referrer = re.sub(request.host_url, '', ref)
-        if referrer == url_for('admin.samples'):
-            return render_template('admin/search_result.html', search=s)
-        else:
-            return render_template('search_result.html', search=s)
-    return str(s)
+PER_PAGE = 20
 
 
-def search(query):
+def search(query, page=1):
     """ Search for a sample matching query """
-    # TODO Pagination
-    # Empty query ?
-    if query is None:
-        return ''
-    # Check if prefix are used
-    prefix_list = ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']
-    samples = []
-    if ' ' in query:
-        elems = [elem.replace(':', '') for elem in shlex.split(query)]
-        prefixes = []
-        for i, elem in enumerate(elems):
-            if i % 2 == 0 and elem in prefix_list:
-                prefixes.append(elem)
+    if not query:
+        query = ''
 
+    if ':' in query:
+        elems = [elem.replace(':', '') for elem in shlex.split(query)]
+        allowed_prefixes = ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']
         req = []
-        for prefix in prefixes:
-            try:
-                prefix_value = elems[elems.index(prefix) + 1]
-            except IndexError:
+        # Add every condition to the query
+        subq, subq2 = None, None
+        tags = None
+        for i in range(0, len(elems), 2):
+            prefix = elems[i]
+            value = elems[i + 1]
+            if prefix not in allowed_prefixes:
                 continue
-            if prefix in ['first_analysis', 'last_analysis']:
+            elif prefix in ['first_analysis', 'last_analysis']:
                 try:
-                    date = dateutil.parser.parse(prefix_value)
+                    date = dateutil.parser.parse(value)
                 except ValueError:
                     continue
                 req.append(getattr(Sample, prefix) >= date)
-                date += timedelta(days=1)
+                date += datetime.timedelta(days=1)
                 req.append(getattr(Sample, prefix) < date)
             elif prefix == 'name':
-                # Search name
                 subq = db.session.query(Sample.sha256, db.func.unnest(Sample.name).label('name')).subquery()
                 subq2 = db.session.query(subq.c.sha256.distinct().label('sha256')).filter(
-                    subq.c.name.like('%{val}%'.format(val=prefix_value))).subquery()
-                samples.extend(db.session.query(Sample).join(subq2, Sample.sha256 == subq2.c.sha256).all())
+                    subq.c.name.like('%{name}%'.format(name=value))).subquery()
+            elif prefix == 'tags':
+                tags = get_tags_table()
+                req.append(Tag.name.like('%{tag}%'.format(tag=value)))
+                samples = Sample.query.filter() \
+                    .join(tags,
+                          tags.c.sample_sha256 == Sample.sha256) \
+                    .join(Tag,
+                          Tag.id == tags.c.tag_id) \
+                    .all()
+                print(samples)
             else:
-                req.append(getattr(Sample, prefix).like('%{val}%'.format(val=prefix_value)))
-        # TODO
-        if not samples:
-            samples.extend(Sample.query.filter(*req).all())
+                req.append(getattr(Sample, prefix).like('%{val}%'.format(val=value)))
+        # Execute the query
+        if subq2 is not None and tags is not None:
+            samples = Sample.query.filter(*req).join(subq2, Sample.sha256 == subq2.c.sha256).join(tags,
+                                                                                                  tags.c.sample_sha256 == Sample.sha256).join(
+                Tag, tags.c.tag_id == Tag.id).paginate(page, PER_PAGE)
+        elif tags is not None:
+            samples = Sample.query.filter(*req).join(tags,
+                                                     tags.c.sample_sha256 == Sample.sha256).join(
+                Tag, tags.c.tag_id == Tag.id).paginate(page, PER_PAGE)
+        elif subq2 is not None:
+            samples = Sample.query.filter(*req).join(subq2, Sample.sha256 == subq2.c.sha256).paginate(page, PER_PAGE)
+        else:
+            samples = Sample.query.filter(*req).paginate(page, PER_PAGE)
     else:
-        samples.extend(Sample.query.filter(Sample.sha256.like('%{sha256}%'.format(sha256=query))).all())
-        if not samples:
+        samples = Sample.query.filter(Sample.sha256.like('%{sha256}%'.format(sha256=query))).paginate(page, PER_PAGE)
+        if not samples.items:
             # Search name
             subq = db.session.query(Sample.sha256, db.func.unnest(Sample.name).label('name')).subquery()
             subq2 = db.session.query(subq.c.sha256.distinct().label('sha256')).filter(
                 subq.c.name.like('%{val}%'.format(val=query))).subquery()
-            samples = db.session.query(Sample).join(subq2, Sample.sha256 == subq2.c.sha256).all()
-    if not samples:
-        return ''
-    return [samp for samp in samples]
+        samples = Sample.query.join(subq2, Sample.sha256 == subq2.c.sha256).paginate(page, PER_PAGE)
+    return samples

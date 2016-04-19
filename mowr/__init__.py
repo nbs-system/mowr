@@ -42,10 +42,12 @@ def create_app(config_filename=''):
 
     from mowr.views import default
     from mowr.views import admin
-    from mowr.views import common
     app.register_blueprint(default.default)
     app.register_blueprint(admin.admin)
-    app.register_blueprint(common.common)
+
+    # Drop and create database because it's fun
+    #db.drop_all()
+    db.create_all()
 
     # Drop and create database because it's fun
     #db.drop_all()
