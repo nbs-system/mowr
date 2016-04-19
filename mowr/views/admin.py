@@ -4,6 +4,7 @@ from mowr.model.analyser import Analyser
 from datetime import datetime, timedelta
 import dateutil.parser
 import re
+import shlex
 import six
 import os
 
@@ -209,10 +210,13 @@ def search(query):
         return ''
     # Check if prefix are used (Waoh so dirty)
     prefix_list = ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']
-    if ':' in query:
-        elems = [elem.replace(' ', '') for elem in re.split('[:,]', query)]
-        prefixes = elems[::2]
-        prefixes = [pref for pref in prefixes if pref in prefix_list]
+    if ' ' in query:
+        elems = [elem for elem in shlex.split(query)]
+        prefixes = []
+        for i, elem in enumerate(elems):
+            if i % 2 == 0 and elem in prefix_list:
+                prefixes.append(elem)
+
         req = dict()
         for prefix in prefixes:
             try:
