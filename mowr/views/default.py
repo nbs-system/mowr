@@ -1,11 +1,13 @@
+import datetime
 from hashlib import sha256
+from os import chmod
+from random import choice
+
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app, session
+
 from mowr.model.analyser import Analyser
 from mowr.model.db import Sample
 from mowr.views.common import search
-from random import choice
-from os import chmod
-import datetime
 
 default = Blueprint('default', __name__, static_folder='../static', static_url_path='/static')
 
@@ -29,6 +31,7 @@ def upload():
     if file is None or not file.filename:
         flash('Please select a valid file.', 'warning')
         return redirect(url_for('default.index'))
+
     type = request.form.get('type')
     if type is None:
         flash('Sorry but the request you sent is invalid.', 'warning')
@@ -46,10 +49,8 @@ def upload():
     if sample_exists(type=type, sha256=sha256sum) == "OK":
         return redirect(url_for('default.choose', sha256=sha256sum, type=type))
 
-    # If it is the first time, save the file to the correct location
-    newfile = Analyser.getfilepath(sha256sum)
-    # Seek is needed because of the above file.stream.read()
-    file.stream.seek(0)
+    newfile = Analyser.getfilepath(sha256sum)  # If it is the first time, save the file to the correct location
+    file.stream.seek(0)  # Seek is needed because of the above file.stream.read()
     try:
         file.save(newfile)
     except OSError:
@@ -83,8 +84,8 @@ def analysis(type, sha256):
     f = analyser.getsample()
     if f is None:
         abort(404)
-    diff = datetime.datetime.utcnow() - f.last_analysis
-    suggest_reanalyse = diff > datetime.timedelta(days=90)
+
+    suggest_reanalyse = datetime.datetime.utcnow() - f.last_analysis > datetime.timedelta(days=90)
     return render_template('result.html', file=f, formatTag=formatTag, type=type,
                            tag_list=current_app.config.get('TAG_LIST'), reanalyse=suggest_reanalyse)
 

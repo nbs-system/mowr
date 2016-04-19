@@ -1,15 +1,17 @@
-from datetime import datetime
 import hashlib
-import ssdeep
-from flask import current_app, flash, session
-from os import access, R_OK
-from mowr.model.db import Sample, Analysis
-from time import time
-from collections import Counter
-from werkzeug.utils import secure_filename
-import magic
 import math
+import os
+import ssdeep
+from collections import Counter
+from datetime import datetime
+from time import time
+
+import magic
 import yara
+from flask import current_app, flash, session
+from werkzeug.utils import secure_filename
+
+from mowr.model.db import Sample, Analysis
 
 
 class Analyser:
@@ -22,7 +24,7 @@ class Analyser:
     @staticmethod
     def getfilepath(sha256sum):
         """ Return the FileSystem path to the current sample """
-        return '{0}/{1}'.format(current_app.config['UPLOAD_FOLDER'], sha256sum)
+        return os.path.join(current_app.config['UPLOAD_FOLDER'], sha256sum)
 
     @staticmethod
     def check_type(type):
@@ -33,7 +35,7 @@ class Analyser:
     def analyse(self):
         """ Analyse a file and store the analysis result in the database """
         # Make sure the file exists and is readable
-        if not access(self.file, R_OK):
+        if not os.access(self.file, os.R_OK):
             flash('There was an error while trying to analyse the file.', 'danger')
             return False
 
@@ -54,7 +56,7 @@ class Analyser:
 
         if not self.getsample():
             # If new sample, compute its hashes
-            (sha256sum, sha1, md5sum, ssdeephash, mime, entropy) = self.compute_sample()
+            sha256sum, sha1, md5sum, ssdeephash, mime, entropy = self.compute_sample()
             # If new sample insert it
             sample = Sample(
                 first_analysis=datetime.utcnow(),
@@ -74,7 +76,6 @@ class Analyser:
         else:
             # If not update the sample information
             sample = Sample.objects(sha256=self.sha256).first()
-            updated = False
 
             # Update already existing analysis
             for anal in sample.analyzes:
@@ -83,11 +84,8 @@ class Analyser:
                     a.pmf_result = analysis.pmf_result
                     a.analysis_time = analysis.analysis_time
                     sample.save()
-                    updated = True
                     break
-
-            # Or add the new analysis
-            if not updated:
+            else:  # Or add the new analysis
                 sample.analyzes.append(analysis)
                 sample.save()
 
@@ -112,7 +110,7 @@ class Analyser:
 
     def do_analyse(self):
         """ Analyse the file with PMF """
-        rule_file = '{path}/{rule}.yara'.format(path=current_app.config.get('PMF_PATH'), rule=self.type.lower())
+        rule_file = os.path.join(current_app.config.get('PMF_PATH'), self.type.lower())
         rules = yara.compile(rule_file)
         with open(self.file, 'rb') as f:
             matches = rules.match(data=f.read())
