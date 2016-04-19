@@ -26,12 +26,12 @@ def upload():
     """ Upload form """
     # Check file param
     file = request.files.get('file')
-    if file is None:
-        flash('There was an error while uploading the file. Please try with a different file.', 'danger')
+    if file is None or not file.filename:
+        flash('Please select a valid file.', 'warning')
         return redirect(url_for('default.index'))
     type = request.form.get('type')
     if type is None:
-        flash('Sorry but the request you sent is invalid.', 'danger')
+        flash('Sorry but the request you sent is invalid.', 'warning')
         return redirect(url_for('default.index'))
 
     # Check size (I think Flask is doing this by itself, but we never know...)
