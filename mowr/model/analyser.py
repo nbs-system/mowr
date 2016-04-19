@@ -116,7 +116,7 @@ class Analyser:
         rules = yara.compile(rule_file)
         with open(self.file, 'rb') as f:
             matches = rules.match(data=f.read())
-        return [str(m) for m in matches]
+        return map(str, matches)
 
     def getsample(self):
         """ Return the Sample object (database row) """
@@ -128,5 +128,9 @@ class Analyser:
             Sample.objects(sha256=self.sha256).first().update(add_to_set__name=filename)
 
     def entropy(self, buf):
+        """ Compute Shanon's entropy ( https://rosettacode.org/wiki/Entropy#Python:_More_succinct_version )
+        :param str buf: The thing on which we compute the entropy
+        :return int : Shanon's entropy of `buf`
+        """
         p, lns = Counter(buf), float(len(buf))
         return -sum(count/lns * math.log(count/lns, 2) for count in p.values())

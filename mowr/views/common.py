@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, current_app, session, request, url_for
+from flask import Blueprint, render_template, request, url_for
 from mowr.model.db import Sample
 from datetime import timedelta
 import dateutil.parser

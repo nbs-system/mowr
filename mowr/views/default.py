@@ -52,7 +52,7 @@ def upload():
     file.stream.seek(0)
     try:
         file.save(newfile)
-    except PermissionError:
+    except OSError:
         flash('The file could not be saved.', 'danger')
 
     # Chmod the file to prevent it from being executed

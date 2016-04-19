@@ -24,7 +24,7 @@ def create_app(config_filename=''):
     if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
         try:
             os.mkdir(app.config['UPLOAD_FOLDER'])
-        except:
+        except OSError:
             print("%s is not writable. Please update the configuration (UPLOAD_FOLDER)." % app.config['UPLOAD_FOLDER'])
             exit(1)
 
