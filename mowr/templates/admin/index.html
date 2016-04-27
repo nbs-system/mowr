@@ -13,7 +13,7 @@
         <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
             <div class="left"></div>
             <div class="right">
-                <span class="count_top"><i class="fa fa-clock-o"></i> Average time</span>
+                <span class="count_top"><i class="fa fa-clock-o"></i> Average analysis time</span>
                 <div class="count">{{ stats.get('samples').get('average_time') }}ms</div>
                 <span class="count_bottom">Since the beginning</span>
             </div>
@@ -21,9 +21,9 @@
         <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
             <div class="left"></div>
             <div class="right">
-                <span class="count_top"><i class="fa fa-user"></i> None</span>
-                <div class="count">0</div>
-                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span>
+                <span class="count_top"><i class="fa fa-user"></i> Clean ratio</span>
+                <div class="count green">{{ '{:.1f}'.format(stats.get('samples').get('ratio')) }}%</div>
+                <span class="count_bottom">(Not) Detected by any analyser</span>
             </div>
         </div>
         <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count">
@@ -58,8 +58,8 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>Line graph
-                        <small>Sessions</small>
+                    <h2>Uploaded files per day
+                        <small>Last week</small>
                     </h2>
                     <ul class="nav navbar-right panel_toolbox">
                         <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>

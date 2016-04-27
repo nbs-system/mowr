@@ -11,12 +11,16 @@ cache:
   - pip
 
 env:
-  - BUILD_LIB=1 PATH=$PATH:$(pwd)/yara
+  - BUILD_LIB=1
 
 install: 
   - "pip install -r requirements.txt"
-  - "git clone https://github.com/plusvic/yara && cd ./yara && ./bootstrap.sh && ./configure && make && cd ../"
 
-services: mongodb
+services: 
+  - postgresql
 
-script: nosetests
+before_script:
+  - psql -c 'create database mowrtest;' -U postgres
+
+script:
+  - nose2

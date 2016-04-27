@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
-{% set vote = file['vote_malicious'] + file['vote_clean'] %}
+{% set vote = sample.vote_malicious + sample.vote_clean %}
 {% block content %}
     {% if reanalyse %}
         <div class="alert alert-info">This file has been last analysed a long time ago. Do you want to <a
-                href="{{ url_for('default.reanalyse', sha256=file['sha256'], type=type) }}">reanalyse it</a> ?
+                href="{{ url_for('default.reanalyse', sha256=sample.sha256, type=type) }}">reanalyse it</a> ?
         </div>
     {% endif %}
     <div class="row">
@@ -15,60 +15,60 @@
                 <canvas id="canvas-ratio"></canvas>
                 <div id="ratio-textfield" style="font-size: 24px;">1</div>
                 <div class="vote">
-                    <a href="#" id="vote_clean" onclick="vote('{{ file['sha256'] }}', 'malicious')"><i class="glyphicon glyphicon-check"></i></a>
-                    <a href="#" id="vote_malicious" onclick="vote('{{ file['sha256'] }}', 'clean')"><i class="glyphicon glyphicon-alert"></i></a>
+                    <a href="#" id="vote_clean" onclick="vote('{{ sample.sha256 }}', 'clean')"><i class="glyphicon glyphicon-check"></i></a>
+                    <a href="#" id="vote_malicious" onclick="vote('{{ sample.sha256 }}', 'malicious')"><i class="glyphicon glyphicon-alert"></i></a>
                 </div>
             </div>
         </div>
     </div>
     <table class="table table-bordered">
         <tr>
-            <td colspan="2" class="active">File informations</td>
+            <td colspan="2" class="active">sample informations</td>
         </tr>
         <tr>
             <td>Name(s)</td>
-            <td>{% for i in file['name'] %}{{ i }} {% endfor %}</td>
+            <td>{% for name in sample.name %}{{ name }} {% endfor %}</td>
         </tr>
         <tr>
             <td>MD5</td>
-            <td>{{ file['md5'] }}</td>
+            <td>{{ sample.md5 }}</td>
         </tr>
         <tr>
             <td>Sha1</td>
-            <td>{{ file['sha1'] }}</td>
+            <td>{{ sample.sha1 }}</td>
         </tr>
         <tr>
             <td>Sha256</td>
-            <td id="sha256">{{ file['sha256'] }}</td>
+            <td id="sha256">{{ sample.sha256 }}</td>
         </tr>
         <tr>
             <td>SSDeep</td>
-            <td>{{ file['ssdeep'] }}</td>
+            <td>{{ sample.ssdeep }}</td>
         </tr>
         <tr>
             <td>Entropy</td>
-            <td>{{ file['entropy'] }}</td>
+            <td>{{ sample.entropy }}</td>
         </tr>
         <tr>
             <td>MIME</td>
-            <td>{{ file['mime'] }}</td>
+            <td>{{ sample.mime }}</td>
         </tr>
         <tr>
             <td colspan="2" class="active">Dates</td>
         </tr>
         <tr>
             <td>First analysis</td>
-            <td>{{ file['first_analysis'] }} UTC</td>
+            <td>{{ sample.first_analysis }} UTC</td>
         </tr>
         <tr>
             <td>Last analysis</td>
-            <td>{{ file['last_analysis'] }} UTC</td>
+            <td>{{ sample.last_analysis }} UTC</td>
         </tr>
         <tr>
             <td>Tags <a href="#" class="td_add" onclick="showTagForm()"><span
                     class="glyphicon glyphicon-plus-sign"></span></a></td>
-            <td>{% for tag in file['tags'] %}
-                {{ formatTag(tag)|safe }}
+            <td>{% for tag in sample.tags %}
+                {{ tag.format()|safe }}
             {% endfor %}
             </td>
         </tr>
@@ -78,8 +78,8 @@
                 <select title="Select a tag to add" id="tagtoadd">
                     <option>-- Choose a tag in the list --</option>
                     {% for tag in tag_list %}
-                        {% if tag not in file['tags'] %}
-                            <option value="{{ tag }}">{{ tag }}</option>
+                        {% if tag not in sample.tags %}
+                            <option value="{{ tag.name }}">{{ tag.name }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
@@ -87,21 +87,19 @@
             </td>
         </tr>
         <tr>
-            <td colspan="2" class="active">File analysis</td>
+            <td colspan="2" class="active">Sample analysis</td>
         </tr>
-        {% for analysis in file['analyzes'] %}
+        {% for analysis in sample.analyzes %}
             {% if analysis.type == type %}
                 <tr>
                     <td>PMF</td>
-                    {% if analysis.pmf_result|length == 0 %}
+                    {% if not analysis and analysis.result|length == 0 %}
                         <td>
                             <div class="clean">Clean <span class="glyphicon glyphicon-ok-sign"></span></div>
                         </td>
                     {% else %}
                         <td>
-                            {% for result in analysis.pmf_result %}
-                                {{ result }}
-                            {% endfor %}
+                            {{ analysis.result }}
                         </td>
                     {% endif %}
                 </tr>
@@ -110,7 +108,7 @@
     </table>
 
     <div class="container">
-        <a href="{{ url_for('default.index') }}"><span class="btn btn-info">Upload a new file</span></a>
+        <a href="{{ url_for('default.index') }}"><span class="btn btn-info">Upload a new sample</span></a>
     </div>
 {% endblock %}
 {% block script %}
@@ -136,7 +134,7 @@
         gauge.minValue = {{ -10 }};
         gauge.maxValue = {{ 10 }}; // set max gauge value
         gauge.animationSpeed = 27; // set animation speed (32 is default value)
-        gauge.set({{ file['vote_malicious'] - file['vote_clean'] }}); // set actual value
+        gauge.set({{ sample['vote_clean'] - sample['vote_malicious'] }}); // set actual value
         gauge.setTextField(document.getElementById("ratio-textfield"))
     </script>
 {% endblock %}

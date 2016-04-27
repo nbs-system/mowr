@@ -1,28 +1,30 @@
-from mowr import create_app
-from mowr.model.db import Sample
-import unittest
 import os
+import unittest
 from io import BytesIO as StringIO
+
+from mowr import create_app
+from mowr import db
 
 
 class DefaultTestCase(unittest.TestCase):
     def setUp(self):
         app = create_app('../tests/config_test.cfg')
-        self.config = app.config
-        self.app = app.test_client()
         # Clean database if already exists
-        Sample.drop_collection()
+        db.drop_all()
+        db.create_all()
         # Remove files from test folder
         for f in os.listdir(app.config['UPLOAD_FOLDER']):
             # Do not delete any file, just sha256 looking one (in case of configuration mistake)
             if len(f) == 64:
                 os.remove('{0}/{1}'.format(app.config['UPLOAD_FOLDER'], f))
+        self.config = app.config
+        self.app = app.test_client()
 
     def test_upload(self):
         """ Test upload form """
         # Upload without any file
         rv = self.app.post('/upload', follow_redirects=True).data.decode('utf-8')
-        self.assertTrue('There was an error while uploading the file. Please try with a different file.' in rv)
+        self.assertTrue('Please select a valid file.' in rv)
 
         # Upload a malicious php file
         file_content = "<?php@eval($_GET['p'])\
@@ -53,6 +55,7 @@ class DefaultTestCase(unittest.TestCase):
     def test_checkfile(self):
         rv = self.app.get('/sample/PHP/NON-EXISTANT_SHA').data.decode('utf-8')
         self.assertEqual(rv, 'NOK')
+
 
 if __name__ == '__main__':
     unittest.main()

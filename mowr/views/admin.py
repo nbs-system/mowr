@@ -1,10 +1,13 @@
-from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
-from mowr.model.db import Sample
-from mowr.model.analyser import Analyser
-from datetime import datetime
-from mowr.views.common import search
-import six
 import os
+from datetime import datetime
+
+import six
+from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
+
+from mowr import db
+from mowr.models.analysis import Analysis
+from mowr.models.sample import Sample
+from mowr.views.common import search
 
 admin = Blueprint('admin', __name__, url_prefix='/admin', static_folder='../static_admin', static_url_path='/static')
 
@@ -61,9 +64,18 @@ def delete(sha256):
     """ Delete a sample from harddrive and database """
     if 'login' not in session:
         return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN'] and Sample.objects(sha256=sha256).first():
-        Sample.objects(sha256=sha256).first().delete()
-        os.remove(Analyser.getfilepath(sha256))
+    sample = Sample.get(sha256)
+    if session.get('login') == current_app.config['ADMIN_LOGIN'] and sample is not None:
+        for tag in sample.tags:
+            db.session.delete(tag)
+        for analysis in sample.analyzes:
+            db.session.delete(analysis)
+        db.session.delete(sample)
+        db.session.commit()
+        try:
+            os.remove(Sample.get_file_path(sha256))
+        except OSError:
+            flash('Could not delete the file from the file system.', 'danger')
         flash('The file %s has been deleted. Are you happy now ?' % sha256, 'warning')
         return redirect(url_for('admin.samples'))
     abort(404)
@@ -74,8 +86,8 @@ def edit(sha256):
     """ Edit a sample metadata """
     if 'login' not in session:
         return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN'] and Sample.objects(sha256=sha256).first():
-        sample = Sample.objects(sha256=sha256).first()
+    sample = Sample.get(sha256)
+    if session.get('login') == current_app.config['ADMIN_LOGIN'] and sample:
         if request.method == 'POST':
             # Reformat what is needed
             name = request.form.get('name').replace(' ', '').split(',')
@@ -85,30 +97,31 @@ def edit(sha256):
             tags = request.form.get('tags').replace(' ', '').split(',')
             analyzes = []
             for analysis in sample.analyzes:
-                analysis.time = request.form.get(analysis.type + '_analysis_time').replace(' ', '')
-                analysis.pmf_result = request.form.get(analysis.type + '_pmf_result').replace(' ', '').split(',')
+                analysis.analysis_time = request.form.get(analysis.type + '_analysis_time').replace(' ', '')
+                analysis.result = request.form.get(analysis.type + '_pmf_result').replace(' ', '').split(',')
                 analyzes.append(analysis)
 
-            # Check inputs
-            for tag in tags:
-                if tag not in current_app.config.get('TAG_LIST'):
-                    flash('The tag %s is not in the allowed tags list.' % tag, 'error')
-                    return redirect(url_for('admin.edit', sha256=sha256))
+            # # Check inputs
+            # for tag in tags:
+            #     if tag not in current_app.config.get('TAG_LIST'):
+            #         flash('The tag %s is not in the allowed tags list.' % tag, 'error')
+            #         return redirect(url_for('admin.edit', sha256=sha256))
 
             # Update
-            sample.update(
-                name=name,
-                mime=mime,
-                first_analysis=first_analysis,
-                last_analysis=last_analysis,
-                analyzes=analyzes
-            )
+            sample.name = name
+            sample.mime = mime,
+            sample.first_analysis = first_analysis,
+            sample.last_analysis = last_analysis,
+            sample.analyzes = analyzes
+            db.session.add(sample)
+            db.session.commit()
             return redirect(url_for('admin.samples'))
+
         # Format name, tags and analysis before rendering
-        sample.name = ', '.join([name for name in sample.name])
-        sample.tags = ', '.join([tag for tag in sample.tags])
-        for analysis in sample.analyzes:
-            analysis.pmf_result = ', '.join([res for res in analysis.pmf_result])
+        #sample.name = ', '.join([name for name in sample.name])
+        #sample.tags = ', '.join([tag for tag in sample.tags])
+        #for analysis in sample.analyzes:
+        #    analysis.result = ', '.join([res for res in analysis.pmf_result])
         return render_template('admin/edit.html', sample=sample)
     abort(404)
 
@@ -117,20 +130,27 @@ def getstats():
     """ Returns a dict containing statistics """
     # Samples infos
     # Count samples in the database
-    samplesNb = Sample.objects.count()
+    samplesNb = Sample.query.count()
     # Get clean and malicious files
-    clean = Sample.objects(vote_clean__gte=1).count()  # TODO
-    malicious = samplesNb - clean
+    malicious = [analysis.sample_sha256 for analysis in Analysis.query.filter_by(result='').all()]
+    clean_number = Analysis.query.filter(
+        Analysis.result != '',
+        ~Analysis.sample_sha256.in_(malicious)
+    ).count()
+    malicious_number = samplesNb - clean_number
+    try:
+        ratio = malicious_number * 100 / samplesNb
+    except ZeroDivisionError:
+        ratio = 0
+
     # Get average time
-    # TODO
-    average_time = Sample.objects.average('analyzes.analysis_time')
+    average_time = db.session.query(db.func.avg(Analysis.analysis_time)).first()[0]
     average_time *= 1000  # To milliseconds
     average_time = '%.3f' % average_time  # Truncate
 
     samples = dict(
         nb=samplesNb,
-        clean=clean,
-        malicious=malicious,
+        ratio=ratio,
         average_time=average_time
     )
 
@@ -158,25 +178,28 @@ def getstats():
             reversed([datetime.fromtimestamp(datetime.utcnow().timestamp() - 3600 * 24 * i) for i in range(7)]))
     dateList = [i.replace(minute=0, hour=0, second=0, microsecond=0) for i in dateList]
     # Count the samples
-    data1 = [Sample.objects(first_analysis__gte=dateList[i], first_analysis__lt=dateList[i + 1]).count() for i in
-             range(len(dateList) - 1)]
-    data1.append(Sample.objects(first_analysis__gte=dateList[len(dateList) - 1]).count())
+    data1 = [Sample.query.filter(Sample.first_analysis >= dateList[i], Sample.first_analysis < dateList[i + 1]).count()
+             for i in range(len(dateList) - 1)]
+    data1.append(Sample.query.filter(Sample.first_analysis >= dateList[len(dateList) - 1]).count())
 
     samplesChart = dict(
         # Get only the year-day-month
         dateList=[i.date().isoformat() for i in dateList],
-        data1=data1,
+        data1=[int(d) for d in data1],
         data2=[0] * 7
     )
 
     # File types
     # Get mime types from database
-    rates = Sample.objects.item_frequencies('mime')
-    stats = [v for i, v in rates.items()]
-    if six.PY2:
-        types = [i.encode('utf-8') for i in rates]
-    else:
-        types = [i for i in rates]
+    rates = db.session.query(db.func.count(Sample.mime), Sample.mime).group_by(Sample.mime).all()
+    stats = []
+    types = []
+    for i, v in rates:
+        stats.append(int(i))
+        if six.PY2:
+            types.append(v.encode('utf-8'))
+        else:
+            types.append(v)
 
     fileType = dict(
         stats=stats,

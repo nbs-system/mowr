@@ -1,7 +1,10 @@
-from flask import Flask, render_template
-from flask_mongoengine import MongoEngine
 import base64
 import os
+
+from flask import Flask, render_template
+from flask.ext.sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 
 def create_app(config_filename=''):
@@ -9,15 +12,18 @@ def create_app(config_filename=''):
     app.config.from_pyfile(config_filename)
     app.config['SECRET_KEY'] = base64.b64encode(os.urandom(128))
 
-    # Create database connection object
-    app.db = MongoEngine(app)
+    # Set database config
+    db.init_app(app)
+    db.app = app
 
     # Check PMF Path
     pmf_default_path = 'php-malware-finder/php-malware-finder'
     if os.access(pmf_default_path, os.R_OK):
         app.config['PMF_PATH'] = pmf_default_path
     elif not os.access(app.config['PMF_PATH'], os.R_OK):
-        print("Cannot access PMF binary. Please clone the repository in the root folder or update the configuration (PMF_PATH).")
+        print(
+            "Cannot access PMF binary. Please clone the repository"
+            " in the root folder or update the configuration (PMF_PATH).")
         exit(1)
 
     # Check upload folder access
@@ -40,6 +46,10 @@ def create_app(config_filename=''):
     app.register_blueprint(default.default)
     app.register_blueprint(admin.admin)
     app.register_blueprint(common.common)
+
+    # Drop and create database because it's fun
+    #db.drop_all()
+    db.create_all()
 
     # Error handlers
     @app.errorhandler(404)

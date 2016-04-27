@@ -1,6 +1,8 @@
 ssdeep
 python-magic
 Flask
-Flask-MongoEngine
-yara
+Flask-SqlAlchemy
 python-dateutil
+yara-python
+nose2
+psycopg2

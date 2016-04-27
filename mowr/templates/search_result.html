@@ -19,7 +19,7 @@
             </td>
             <td>{{ sample.first_analysis }}</td>
             <td>{{ sample.last_analysis }}</td>
-            <td>{{ sample.tags }}</td>
+            <td>{% for tag in sample.tags %}{{ tag.format()|safe }}{% endfor %}</td>
         </tr>
     {% endfor %}
     </tbody>

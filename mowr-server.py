@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-from mowr import create_app
 import os
+
+from mowr import create_app
 
 
 def __get_config_file():
@@ -13,6 +14,7 @@ def run():
     app = create_app(__get_config_file())
     app.threaded = True
     app.debug = True
+
     # Avoid creating a new key each time a file is modified
     if app.debug:
         app.config['SECRET_KEY'] = 'rZy9tp8G8EvtBap2cE1ibzUfhaNNJXS76InlXfcME1clVQYek5jl6hS8+TRWleAgoZGjXEKCHCPh2idlTLGsE9lIas2fa5DCNNo1UvGkKKpeUJqQ+/f9nYvLUMeaJkShV5j/GsTCa8ygNLd/Yn7DUyp2PbijNi/kqwUS9THRIWE='

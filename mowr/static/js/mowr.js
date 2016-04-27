@@ -60,9 +60,9 @@ function vote(sha256, type) {
         url: "/vote/" + sha256 + "/" + type, success: function (result) {
             if (result === "OK") {
                 if (type == 'clean') {
-                    n = -1;
-                } else {
                     n = 1;
+                } else {
+                    n = -1;
                 }
                 // gauge is already set if we are on the right page
                 gauge.set(gauge.value + n);
@@ -88,6 +88,21 @@ function submitTag() {
             if (result === "OK") {
                 hideTagForm();
             }
+        }
+    })
+}
+
+function search_sample() {
+    /* TODO ADD SPINNING WHEEL */
+    var query = $("#search-samples")[0].value;
+    if (query.length < 2) {
+        $("#search-result").html('');
+        return;
+    }
+    $.ajax({
+        url: "/common/search/" + query + "/f",
+        success: function (result) {
+            $("#search-result").html(result);
         }
     })
 }
