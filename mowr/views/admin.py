@@ -87,7 +87,7 @@ def whitelist():
             zipfile = Legit(saveloc, analyse_type)
             zipfile.analyse()
             os.remove(saveloc)
-        return render_template('admin/whitelist.html')
+        return render_template('admin/whitelist.html', file_types=current_app.config.get('FILE_TYPES'))
     abort(404)
 
 @admin.route('/delete/<sha256>')
@@ -107,8 +107,8 @@ def delete(sha256):
             os.remove(Sample.get_file_path(sha256))
         except OSError:
             flash('Could not delete the file from the file system.', 'danger')
-        flash('The file %s has been deleted. Are you happy now ?' % sha256, 'warning')
-        return redirect(url_for('admin.samples'))
+        flash('The file %s has been deleted. Are you happy now ?' % sha256, 'success')
+        return redirect(request.referrer)
     abort(404)
 
 
