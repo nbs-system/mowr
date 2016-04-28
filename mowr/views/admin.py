@@ -90,6 +90,15 @@ def whitelist():
         return render_template('admin/whitelist.html', file_types=current_app.config.get('FILE_TYPES'))
     abort(404)
 
+@admin.route('/tags')
+def tags():
+    if 'login' not in session:
+        return redirect(url_for('admin.login'))
+    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
+        tag_list = Tag.get_all()
+        return render_template('admin/tags.html', tags=tag_list)
+    abort(404)
+
 @admin.route('/delete/<sha256>')
 def delete(sha256):
     """ Delete a sample from harddrive and database """
