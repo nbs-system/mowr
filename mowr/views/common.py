@@ -17,6 +17,8 @@ def search(query, page=1):
 
     if ':' in query:
         elems = [elem.replace(':', '') for elem in shlex.split(query)]
+        if len(elems) % 2 == 1:
+            elems.append('')
         allowed_prefixes = ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']
         req = []
         # Add every condition to the query
