@@ -1,0 +1,18 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Whitelist</h2>
+            <h2>Upload a zip archive file (which does not contain any other archive file)</h2>
+            <form action="{{ url_for('admin.whitelist') }}" method="post" enctype="multipart/form-data" class="dropzone"
+                  id="dropzone">
+            <span class="btn btn-file">
+                <i class="glyphicon glyphicon-file upload-icon"></i>
+                <span class="center">Drag and drop a file here or click to browse</span>
+                <input type="file" name="file" class="btn-input" id="dropzone-file">
+            </span>
+                <input type="submit" value="Upload" class="btn btn-info btn-lg">
+            </form>
+        </div>
+    </div>
+{% endblock %}
