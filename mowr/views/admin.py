@@ -51,7 +51,6 @@ def logout():
 @admin.route('/samples/<page>', methods=['GET', 'POST'])
 def samples(page):
     """ Samples page """
-    # TODO Pagination
     if 'login' not in session:
         return redirect(url_for('admin.login'))
     elif session.get('login') == current_app.config['ADMIN_LOGIN']:
@@ -114,7 +113,7 @@ def edit(sha256):
                     return redirect(url_for('admin.edit', sha256=sha256))
                 tag_list.append(all_tags[i])
 
-            # Update
+            # Update2
             sample.name = name
             sample.mime = mime,
             sample.first_analysis = first_analysis,

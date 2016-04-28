@@ -23,7 +23,7 @@ def upload():
         return redirect(url_for('default.index'))
 
     type = request.form.get('type')
-    if type is None:
+    if type is None or type not in current_app.config.get('FILE_TYPES'):
         flash('Sorry but the request you sent is invalid.', 'warning')
         return redirect(url_for('default.index'))
 
@@ -66,7 +66,7 @@ def choose(type, sha256):
 @default.route('/analysis/<type>/<sha256>')
 def analysis(type, sha256):
     """ Analysis result page """
-    if type is None or type == 'any':
+    if type not in current_app.config.get('FILE_TYPES'):
         # TODO Get most revelant analysis to show
         return redirect(url_for('default.analysis', sha256=sha256, type=current_app.config.get('FILE_TYPES')[0]))
     sample = Sample.query.filter_by(sha256=sha256).first()
@@ -85,14 +85,6 @@ def analyse(type, sha256):
     analyser = Analyser(sha256=sha256, type=type)
     analyser.analyse()
     return redirect(url_for('default.analysis', sha256=sha256, type=type))
-
-
-@default.route('/tag/<tag>')
-def tag(tag):
-    """ Tag page """
-    l = []
-    # TODO Delete this page and move it on the search page
-    return render_template('tag.html', files=l)
 
 
 @default.route('/documentation')
@@ -129,7 +121,8 @@ def submit_tag(sha256, tag):
     if tag is None or tag not in tag_names:
         return "NOK"
     sample = Sample.get(sha256)
-    if sample is None or tag in sample.tags:
+    sample_tag_names = [t.name for t in sample.tags]
+    if sample is None or tag in sample_tag_names:
         return "NOK"
 
     tag = tag_names.index(tag)

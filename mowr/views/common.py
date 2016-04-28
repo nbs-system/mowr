@@ -71,5 +71,5 @@ def search(query, page=1):
             subq = db.session.query(Sample.sha256, db.func.unnest(Sample.name).label('name')).subquery()
             subq2 = db.session.query(subq.c.sha256.distinct().label('sha256')).filter(
                 subq.c.name.like('%{val}%'.format(val=query))).subquery()
-        samples = Sample.query.join(subq2, Sample.sha256 == subq2.c.sha256).paginate(page, PER_PAGE)
+            samples = Sample.query.join(subq2, Sample.sha256 == subq2.c.sha256).paginate(page, PER_PAGE)
     return samples

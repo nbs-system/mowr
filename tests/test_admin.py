@@ -23,22 +23,22 @@ class AdminTestCase(unittest.TestCase):
         """ Test login form """
         # Upload without any data
         rv = self.app.post('/admin/login', follow_redirects=True).data.decode('utf-8')
-        self.assertTrue('Sorry, are you sure about what you are doing ?' in rv)
+        self.assertIn('Sorry, are you sure about what you are doing ?', rv)
 
         # Insert wrong username/password
         rv = self.app.post('/admin/login', data=dict(
             login='wut',
             password='wutwut'
         ), follow_redirects=True).data.decode('utf-8')
-        self.assertTrue('Sorry, are you sure about what you are doing ?' in rv)
+        self.assertIn('Sorry, are you sure about what you are doing ?', rv)
 
         # Login with correct password
         rv = self.login()
-        self.assertTrue('You should be redirected automatically to target URL: <a href="/admin/">/admin/</a>' in rv)
+        self.assertIn('You should be redirected automatically to target URL: <a href="/admin/">/admin/</a>', rv)
 
         # Try to connect while already connected
         rv = self.app.post('/admin/login').data.decode('utf-8')
-        self.assertTrue('You should be redirected automatically to target URL: <a href="/admin/">/admin/</a>' in rv)
+        self.assertIn('You should be redirected automatically to target URL: <a href="/admin/">/admin/</a>', rv)
 
     def test_logout(self):
         """ Test logout form """
@@ -46,8 +46,8 @@ class AdminTestCase(unittest.TestCase):
         self.login()
         self.app.get('/admin/logout')
         rv = self.app.get('/admin/').data.decode('utf-8')
-        self.assertTrue(
-            'You should be redirected automatically to target URL: <a href="/admin/login">/admin/login</a>' in rv)
+        self.assertIn(
+            'You should be redirected automatically to target URL: <a href="/admin/login">/admin/login</a>', rv)
 
     def test_index(self):
         """ Test admin index """
@@ -73,12 +73,25 @@ class AdminTestCase(unittest.TestCase):
 
         # Access without being logged in
         rv = self.app.get('/admin/').data.decode('utf-8')
-        self.assertTrue('You should be redirected automatically to target URL: <a href="/admin/login">/admin/login</a>' in rv)
+        self.assertIn('You should be redirected automatically to target URL: <a href="/admin/login">/admin/login</a>',
+                      rv)
 
         # Log in and access it
         self.login()
         rv = self.app.get('/admin/').data.decode('utf-8')
         dates = [datetime.date.today() - datetime.timedelta(days=x) for x in range(7)]
         dates = [date.isoformat() for date in reversed(dates)]
-        self.assertTrue("labels: " + str(dates) + "," in rv)
+        self.assertIn("labels: " + str(dates) + ",", rv)
+
+    def test_samples(self):
+        # Access the page with no authentication
+        rv = self.app.get('/admin/samples').data.decode('utf-8')
+        self.assertIn('You should be redirected automatically to target URL: <a href="/admin/login">/admin/login</a>',
+                      rv)
+
+        # Log in
+        self.login()
+        rv = self.app.get('/admin/samples').data.decode('utf-8')
+        self.assertIn('<h2>Search</h2>', rv)
+
 

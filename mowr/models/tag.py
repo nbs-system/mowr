@@ -1,5 +1,3 @@
-from flask import url_for
-
 from mowr import db
 
 tags = db.Table('tags',
@@ -27,5 +25,4 @@ class Tag(db.Model):
         return Tag.query.all()
 
     def format(self):
-        return '<a class="label label-' + self.color + '" href="' + url_for('default.tag',
-                                                                            tag=self.name) + '">' + self.name + '</a>'
+        return '<a class="label label-' + self.color + '" href="#">' + self.name + '</a>'

@@ -1,8 +1,10 @@
 import base64
 import os
+import logging
 
 from flask import Flask, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import OperationalError
 
 db = SQLAlchemy()
 
@@ -21,8 +23,8 @@ def create_app(config_filename=''):
     if os.access(pmf_default_path, os.R_OK):
         app.config['PMF_PATH'] = pmf_default_path
     elif not os.access(app.config['PMF_PATH'], os.R_OK):
-        print(
-            "Cannot access PMF binary. Please clone the repository"
+        logging.error(
+            "Could not access PMF binary. Please clone the repository"
             " in the root folder or update the configuration (PMF_PATH).")
         exit(1)
 
@@ -31,12 +33,12 @@ def create_app(config_filename=''):
         try:
             os.mkdir(app.config['UPLOAD_FOLDER'])
         except OSError:
-            print("%s is not writable. Please update the configuration (UPLOAD_FOLDER)." % app.config['UPLOAD_FOLDER'])
+            logging.error("%s is not writable. Please update the configuration (UPLOAD_FOLDER)." % app.config['UPLOAD_FOLDER'])
             exit(1)
 
     # Make sure the analysis types are ok
     if app.config.get('FILE_TYPES') is None or len(app.config.get('FILE_TYPES')) == 0:
-        print("Analysis types seems wrong (%s). Please update your configuration (UPLOAD_FOLDER)." % app.config[
+        logging.error("Analysis types seems wrong (%s). Please update your configuration (UPLOAD_FOLDER)." % app.config[
             'FILE_TYPES'])
         exit(1)
 
@@ -46,8 +48,12 @@ def create_app(config_filename=''):
     app.register_blueprint(admin.admin)
 
     # Drop and create database because it's fun
-    #db.drop_all()
-    db.create_all()
+    try:
+        #db.drop_all()
+        db.create_all()
+    except OperationalError:
+        logging.error("Could not connect to the database. Check your configuration and server settings.")
+        exit(1)
 
     # Drop and create database because it's fun
     #db.drop_all()
