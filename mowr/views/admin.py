@@ -70,21 +70,23 @@ def whitelist():
         return redirect(url_for('admin.login'))
     elif session.get('login') == current_app.config['ADMIN_LOGIN']:
         if request.method == 'POST':
-            file = request.files.get('file')
-            if file is None or not file.filename:
+            myfile = request.files.get('file')
+            if myfile is None or not myfile.filename:
                 flash('Please select a valid file.', 'warning')
                 return redirect(url_for('admin.whitelist'))
 
             # Save the file and unzip it
-            filename = secure_filename(file.filename) + '.zip'
+            filename = secure_filename(myfile.filename)
             saveloc = os.path.join(current_app.config.get('UPLOAD_FOLDER'), filename)
             try:
-                file.save(saveloc)
+                myfile.save(saveloc)
             except OSError:
                 flash('Error while saving the file. Aborting.', 'error')
 
-            zipfile = Legit(saveloc)
+            analyse_type = request.form.get('type')
+            zipfile = Legit(saveloc, analyse_type)
             zipfile.analyse()
+            os.remove(saveloc)
         return render_template('admin/whitelist.html')
     abort(404)
 

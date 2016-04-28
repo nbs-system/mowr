@@ -6,7 +6,7 @@ from mowr.models.sample import Sample
 
 
 class Analyser(object):
-    def __init__(self, sha256, type=None, name=None):
+    def __init__(self, sha256, name=None, type=None):
         self.name = [name]
         self.sha256 = sha256
         self.type = type
