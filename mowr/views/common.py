@@ -10,24 +10,23 @@ from mowr.models.tag import get_tags_table
 PER_PAGE = 20
 
 
-def search(query, page=1):
-    """ Search for a sample matching query """
-    if not query:
-        query = ''
+def search(query='', page=1):  # TODO factorize/simplify
+    """ Search for a sample matching query
 
+     :param str query: The search query
+     """
     if ':' in query:
         elems = [elem.replace(':', '') for elem in shlex.split(query)]
         if len(elems) % 2 == 1:
             elems.append('')
-        allowed_prefixes = ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']
+
         req = []
         # Add every condition to the query
         subq, subq2 = None, None
         tags = None
         for i in range(0, len(elems), 2):
-            prefix = elems[i]
-            value = elems[i + 1]
-            if prefix not in allowed_prefixes:
+            prefix, value = elems[i:i+1]
+            if prefix not in ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']:
                 continue
             elif prefix in ['first_analysis', 'last_analysis']:
                 try:

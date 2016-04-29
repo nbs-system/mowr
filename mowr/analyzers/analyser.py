@@ -7,7 +7,7 @@ from mowr.models.sample import Sample
 
 
 class Analyser(object):
-    def __init__(self, sha256, name=None, type=None):
+    def __init__(self, sha256, name=None, type=None):  # TODO: Add an `analyse` flag, `False` or `True` by default?
         self.name = [name]
         self.sha256 = sha256
         self.type = type
@@ -53,7 +53,7 @@ class Analyser(object):
         :param name: str
         """
         sample = Sample.get(sha256=sha256)
-        if name not in sample.name:
+        if name not in sample.name: # TODO please explain :/
             sample.name = sample.name + [name]
             db.session.add(sample)
             db.session.commit()

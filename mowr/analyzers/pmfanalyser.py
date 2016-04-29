@@ -10,7 +10,7 @@ from mowr.models.sample import Sample
 
 class PmfAnalyser(Analysis):
     def __init__(self, type, sha256):
-        self.type = type
+        self.type = type  # FIXME plz do not redefine builtins
         self.soft = 'PMF'
         self.sample_sha256 = sha256
         self.analyse()
@@ -18,7 +18,7 @@ class PmfAnalyser(Analysis):
     def analyse(self):
         """ Analyse the file with PMF """
         start = time.time()
-        rule_file = os.path.join(current_app.config.get('PMF_PATH'), self.type.lower() + '.yar')
+        rule_file = os.path.join(current_app.config.get('PMF_PATH'), self.type.lower(), '.yar')
         rules = yara.compile(rule_file)
 
         try:

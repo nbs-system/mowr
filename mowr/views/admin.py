@@ -51,13 +51,12 @@ def logout():
 
 
 @admin.route('/samples', defaults={'page': 1}, methods=['GET', 'POST'])
-@admin.route('/samples/<page>', methods=['GET', 'POST'])
+@admin.route('/samples/<int:page>', methods=['GET', 'POST'])
 def samples(page):
     """ Samples page """
     if 'login' not in session:
         return redirect(url_for('admin.login'))
     elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        page = int(page)
         query = request.form.get('search')
         samples = search(query, page)
         return render_template('admin/samples.html', samples=samples)

@@ -23,10 +23,10 @@ class Tag(db.Model):
         self.color = color
 
     @validates('name')
-    def validate_name(self, key, name):
+    def validate_name(self, key, name):  # FIXME change the name of the function, we don't validate here.
         return name[:25]
 
-    @validates('color')
+    @validates('color')  # FIXME use str.translate()
     def validate_color(self, key, color):
         pattern = '"\'<>'
         color = ''.join([c for c in color if c not in pattern])
@@ -34,11 +34,11 @@ class Tag(db.Model):
 
     @staticmethod
     def get_all():
-        return Tag.query.all()
+        return Tag.query.all()  # FIXME: use `self` instead? If not, document why.
 
     @staticmethod
     def get(id):
         return Tag.query.filter_by(id=id).first()
 
-    def format(self):
+    def format(self):  # FIXME use __str__ instead
         return '<a class="label label-' + self.color + '" href="#">' + self.name + '</a>'
