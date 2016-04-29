@@ -177,6 +177,7 @@ def edit(sha256):
         return redirect(url_for('admin.login'))
     sample = Sample.get(sha256)
     if session.get('login') == current_app.config['ADMIN_LOGIN'] and sample:
+        all_tags = Tag.get_all()
         if request.method == 'POST':
             # Reformat what is needed
             name = request.form.get('name').replace(' ', '').split(',')
@@ -186,15 +187,20 @@ def edit(sha256):
             tag_input = request.form.get('tags').replace(' ', '').split(',')
             analyzes = []
             for analysis in sample.analyzes:
-                analysis.analysis_time = request.form.get(analysis.type + '_analysis_time').replace(' ', '')
-                analysis.result = request.form.get(analysis.type + '_pmf_result').replace(' ', '').split(',')
+                time = request.form.get(
+                    '{type}_{soft}_analysis_time'.format(type=analysis.type, soft=analysis.soft)).replace(' ', '')
+                result = request.form.get(
+                    '{type}_{soft}_result'.format(type=analysis.type, soft=analysis.soft))
+                analysis.analysis_time = time
+                analysis.result = result
                 analyzes.append(analysis)
 
             # Check inputs
-            all_tags = Tag.get_all()
             available_tags = [tag.name for tag in all_tags]
             tag_list = []
             for i, tag_name in enumerate(tag_input):
+                if len(tag_input) == 1 and tag_input[0] == '':
+                    break
                 if tag_name not in available_tags:
                     flash('The tag %s is not in the allowed tags list.' % tag_name, 'error')
                     return redirect(url_for('admin.edit', sha256=sha256))
@@ -211,7 +217,7 @@ def edit(sha256):
             db.session.commit()
             return redirect(url_for('admin.samples'))
 
-        return render_template('admin/edit.html', sample=sample)
+        return render_template('admin/edit.html', sample=sample, names=[tag.name for tag in sample.tags])
     abort(404)
 
 

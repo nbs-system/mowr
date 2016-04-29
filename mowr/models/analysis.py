@@ -1,3 +1,5 @@
+from sqlalchemy.orm import validates
+
 from mowr import db
 
 
@@ -7,5 +9,14 @@ class Analysis(db.Model):
     soft = db.Column(db.String(10), primary_key=True)
     sample_sha256 = db.Column(db.String(64), db.ForeignKey('sample.sha256'), primary_key=True)
     sample = db.relationship('Sample', back_populates='analyzes')
-    analysis_time = db.Column(db.Float)
-    result = db.Column(db.String)
+    analysis_time = db.Column(db.Float, default=0)
+    result = db.Column(db.String, default='')
+
+    @validates('analysis_time')
+    def validate_analysis_time(self, key, analysis_time):
+        if not isinstance(analysis_time, (int, float)):
+            try:
+                analysis_time = int(analysis_time)
+            except ValueError:
+                analysis_time = 0
+        return analysis_time
