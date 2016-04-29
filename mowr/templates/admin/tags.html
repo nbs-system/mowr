@@ -18,12 +18,14 @@
                     <td>{{ tag.name }}</td>
                     <td>{{ tag.color }}</td>
                     <td>{{ tag.format()|safe }}</td>
-                    <td>TODO</td>
-                    <td>TODO</td>
+                    <td><a href="{{ url_for('admin.edit_tag', id=tag.id) }}"><span
+                            class="glyphicon glyphicon-edit"></span></a></td>
+                    <td><a href="{{ url_for('admin.delete_tag', id=tag.id) }}"><span
+                            class="glyphicon glyphicon-trash"></span></a></td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-        <a href="#" class="btn btn-success">Add a tag</a>
+        <a href="{{ url_for('admin.add_tag') }}" class="btn btn-success">Add a tag</a>
     </div>
 {% endblock %}

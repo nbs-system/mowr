@@ -1,3 +1,5 @@
+from sqlalchemy.orm import validates
+
 from mowr import db
 
 tags = db.Table('tags',
@@ -20,9 +22,23 @@ class Tag(db.Model):
         self.name = name
         self.color = color
 
+    @validates('name')
+    def validate_name(self, key, name):
+        return name[:25]
+
+    @validates('color')
+    def validate_color(self, key, color):
+        pattern = '"\'<>'
+        color = ''.join([c for c in color if c not in pattern])
+        return color[:10]
+
     @staticmethod
     def get_all():
         return Tag.query.all()
+
+    @staticmethod
+    def get(id):
+        return Tag.query.filter_by(id=id).first()
 
     def format(self):
         return '<a class="label label-' + self.color + '" href="#">' + self.name + '</a>'

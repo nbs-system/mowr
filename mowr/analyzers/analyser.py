@@ -1,4 +1,5 @@
-from flask import session
+from flask import session, flash
+from sqlalchemy.exc import DataError
 
 from mowr import db
 from mowr.analyzers.pmfanalyser import PmfAnalyser
@@ -34,7 +35,11 @@ class Analyser(object):
                 sample.analyzes.append(analysis)
 
         # Commit database
-        db.session.commit()
+        try:
+            db.session.commit()
+        except DataError:
+            flash('There was an error while analysing your file.', 'danger')
+            return False
 
         # Allow the user to vote for his sample
         session['can_vote'] = self.sha256

@@ -8,6 +8,7 @@ import math
 import ssdeep
 from flask import current_app, flash
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import validates
 
 from mowr import db
 from mowr.models.tag import tags
@@ -25,7 +26,7 @@ class Sample(db.Model):
     last_analysis = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     vote_clean = db.Column(db.Integer, default=0)
     vote_malicious = db.Column(db.Integer, default=0)
-    mime = db.Column(db.String(25))
+    mime = db.Column(db.String(50))
     tags = db.relationship('Tag', secondary=tags, backref=db.backref('sample', lazy='dynamic'))
     analyzes = db.relationship('Analysis', back_populates='sample', enable_typechecks=False)
 
@@ -44,6 +45,12 @@ class Sample(db.Model):
         self.md5 = md5
         self.sha256 = sha256
         self.name = name
+
+    @validates('mime')
+    def validate(self, key, mime):
+        if mime is None:
+            return mime
+        return mime[:50]
 
     @staticmethod
     def get_file_path(sha256sum):

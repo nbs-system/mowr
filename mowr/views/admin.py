@@ -90,6 +90,7 @@ def whitelist():
         return render_template('admin/whitelist.html', file_types=current_app.config.get('FILE_TYPES'))
     abort(404)
 
+
 @admin.route('/tags')
 def tags():
     if 'login' not in session:
@@ -98,6 +99,54 @@ def tags():
         tag_list = Tag.get_all()
         return render_template('admin/tags.html', tags=tag_list)
     abort(404)
+
+
+@admin.route('/tags/add', methods=['GET', 'POST'])
+def add_tag():
+    if 'login' not in session:
+        return redirect(url_for('admin.login'))
+    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
+        if request.method == 'POST':
+            name = request.form.get('name')
+            color = request.form.get('color')
+            tag = Tag(name, color)
+            db.session.add(tag)
+            db.session.commit()
+            return redirect(url_for('admin.tags'))
+        return render_template('admin/add_tag.html', tag=None)
+    abort(404)
+
+
+@admin.route('/tags/delete/<id>')
+def delete_tag(id):
+    if 'login' not in session:
+        return redirect(url_for('admin.login'))
+    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
+        tag = Tag.get(id)
+        db.session.delete(tag)
+        db.session.commit()
+        return redirect(request.referrer)
+    abort(404)
+
+
+@admin.route('/tags/edit/<id>', methods=['GET', 'POST'])
+def edit_tag(id):
+    if 'login' not in session:
+        return redirect(url_for('admin.login'))
+    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
+        tag = Tag.get(id)
+        if request.method == 'POST':
+            name = request.form.get('name')
+            color = request.form.get('color')
+            tag.name = name
+            tag.color = color
+            db.session.add(tag)
+            db.session.commit()
+            return redirect(url_for('admin.tags'))
+        else:
+            return render_template('admin/add_tag.html', tag=tag)
+    abort(404)
+
 
 @admin.route('/delete/<sha256>')
 def delete(sha256):
@@ -252,4 +301,3 @@ def getstats():
         diskUsage=diskUsage,
         fileType=fileType
     )
-

@@ -51,8 +51,10 @@ def upload():
 
     # Then analyse it and show results
     analyser = Analyser(sha256=sha256sum, name=file.filename, type=type)
-    analyser.analyse()
-    return redirect(url_for('default.analysis', sha256=sha256sum, type=type))
+    if analyser.analyse():
+        return redirect(url_for('default.analysis', sha256=sha256sum, type=type))
+    else:
+        return redirect(url_for('default.index'))
 
 
 @default.route('/choose/<type>/<sha256>', methods=['GET', 'POST'])
