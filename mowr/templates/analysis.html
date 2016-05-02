@@ -67,8 +67,8 @@
         <tr>
             <td>Tags <a href="#" class="td_add" onclick="showTagForm()"><span
                     class="glyphicon glyphicon-plus-sign"></span></a></td>
-            <td>{% for tag in sample.tags %}
-                {{ tag.format()|safe }}
+            <td id="tags">{% for tag in sample.tags %}
+                {{ tag|safe }}
             {% endfor %}
             </td>
         </tr>

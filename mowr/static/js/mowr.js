@@ -84,8 +84,11 @@ function submitTag() {
     var sha256 = $("#sha256")[0].innerHTML;
 
     $.ajax({
-        url: "/tag/submit/" + sha256 + "/" + tag, success: function (result) {
-            if (result === "OK") {
+        url: "/tag/submit/" + sha256 + "/" + tag + "/format", success: function (result) {
+            if (result != "NOK") {
+                var t = $("#tagtoadd")[0];
+                t.remove(t.selectedIndex);
+                $("#tags")[0].innerHTML += result + ' ';
                 hideTagForm();
             }
         }

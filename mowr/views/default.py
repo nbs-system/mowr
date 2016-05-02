@@ -138,8 +138,9 @@ def sample_exists(analysis_type, sha256):
     return "NOK"
 
 
-@default.route('/tag/submit/<sha256>/<tag>')
-def submit_tag(sha256, tag):
+@default.route('/tag/submit/<sha256>/<tag>', defaults={'format': None})
+@default.route('/tag/submit/<sha256>/<tag>/<format>')
+def submit_tag(sha256, tag, format):
     tags = Tag.get_all()
     tag_names = [t.name for t in tags]
     if tag is None or tag not in tag_names:
@@ -153,6 +154,8 @@ def submit_tag(sha256, tag):
     tag = tags[tag]
     sample.tags.append(tag)
     db.session.commit()
+    if format:
+        return str(tag)
     return "OK"
 
 
