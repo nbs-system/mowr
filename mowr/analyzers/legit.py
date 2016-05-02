@@ -7,7 +7,7 @@ from flask import flash
 from mowr.models.sample import Sample
 from mowr.analyzers.analyser import Analyser
 
-MAX_SIZE = 1024*1024*15
+MAX_SIZE = 1024 * 1024 * 15
 
 
 class Legit(object):
@@ -35,7 +35,6 @@ class Legit(object):
                 filename = list(reversed(compressed_file.filename.split('/')))[0]
                 with open(Sample.get_file_path(sha256), 'wb') as f:
                     f.write(buf)
-                analyser = Analyser(sha256=sha256, name=filename, type=self.analyse_type)
-                analyser.analyse()
+                Analyser(sha256=sha256, name=filename, analysis_type=self.analyse_type, analyse=True)
 
         return True

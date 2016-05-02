@@ -7,10 +7,12 @@ from mowr.models.sample import Sample
 
 
 class Analyser(object):
-    def __init__(self, sha256, name=None, type=None):  # TODO: Add an `analyse` flag, `False` or `True` by default?
+    def __init__(self, sha256, name=None, analysis_type=None, analyse=False):
         self.name = [name]
         self.sha256 = sha256
-        self.type = type
+        self.type = analysis_type
+        if analyse:
+            self.analyse()
 
     def analyse(self):
         """ Analyse the sample """
@@ -53,7 +55,7 @@ class Analyser(object):
         :param name: str
         """
         sample = Sample.get(sha256=sha256)
-        if name not in sample.name: # TODO please explain :/
+        if name not in sample.name:  # Since name is an ARRAY (postgresql) we cannot use append()
             sample.name = sample.name + [name]
             db.session.add(sample)
             db.session.commit()

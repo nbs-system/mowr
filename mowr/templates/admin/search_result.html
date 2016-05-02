@@ -22,10 +22,10 @@ Page: {{ samples.page }}
     {% for sample in samples.items %}
         <tr>
             <td>
-                <a href="{{ url_for('default.analysis', sha256=sample.sha256, type='any') }}">{{ sample.name[0] }}</a>
+                <a href="{{ url_for('default.analysis', sha256=sample.sha256, analysis_type='any') }}">{{ sample.name[0] }}</a>
             </td>
             <td>
-                <a href="{{ url_for('default.analysis', sha256=sample.sha256, type='any') }}">{{ sample.sha256 }}</a>
+                <a href="{{ url_for('default.analysis', sha256=sample.sha256, analysis_type='any') }}">{{ sample.sha256 }}</a>
             </td>
             <td>{{ sample.first_analysis }}</td>
             <td>{{ sample.last_analysis }}</td>

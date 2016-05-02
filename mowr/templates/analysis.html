@@ -3,7 +3,7 @@
 {% block content %}
     {% if reanalyse %}
         <div class="alert alert-info">This file has been last analysed a long time ago. Do you want to <a
-                href="{{ url_for('default.reanalyse', sha256=sample.sha256, type=type) }}">reanalyse it</a> ?
+                href="{{ url_for('default.analyse', sha256=sample.sha256, analysis_type=analysis_type) }}">reanalyse it</a> ?
         </div>
     {% endif %}
     <div class="row">
@@ -90,7 +90,7 @@
             <td colspan="2" class="active">Sample analysis</td>
         </tr>
         {% for analysis in sample.analyzes %}
-            {% if analysis.type == type %}
+            {% if analysis.type == analysis_type %}
                 <tr>
                     <td>PMF</td>
                     {% if not analysis and analysis.result|length == 0 %}

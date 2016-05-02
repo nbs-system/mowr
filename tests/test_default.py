@@ -29,6 +29,7 @@ global_sha256 = "bcc5bae3bb00316dbededbabb64c922a2b9556c860d78f54887b73f67885c57
 class DefaultTestCase(unittest.TestCase):
     def setUp(self):
         app = create_app('../tests/config_test.cfg')
+        app.debug = True
         self.config = app.config
         self.app = app.test_client()
         # Clean database if already exists
@@ -157,6 +158,16 @@ class DefaultTestCase(unittest.TestCase):
         self.assertEqual(rv, 'OK')
         self.assertEqual(samp.vote_clean, 0)
         self.assertEqual(samp.vote_malicious, 1)
+
+    def test_search(self):
+        rv = self.app.get('/search').data.decode('utf-8')
+        self.assertIn('bcc5bae3bb00316dbededbabb64c922a2b9556c860d78f54887b73f67885c57a', rv)
+        rv = self.app.get('/search/9').status_code
+        self.assertEqual(404, rv)
+        rv = self.app.get('/search/999999999999999999999999999999999999999999999').status_code
+        self.assertEqual(404, rv)
+        rv = self.app.get('/search/notanint').status_code
+        self.assertEqual(404, rv)
 
 
 if __name__ == '__main__':

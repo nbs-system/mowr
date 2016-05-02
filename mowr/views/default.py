@@ -22,8 +22,8 @@ def upload():
         flash('Please select a valid file.', 'warning')
         return redirect(url_for('default.index'))
 
-    type = request.form.get('type')
-    if type is None or type not in current_app.config.get('FILE_TYPES'):
+    analysis_type = request.form.get('type')
+    if analysis_type is None or analysis_type not in current_app.config.get('FILE_TYPES'):
         flash('Sorry but the request you sent is invalid.', 'warning')
         return redirect(url_for('default.index'))
 
@@ -36,8 +36,8 @@ def upload():
     sha256sum = sha256(file_content).hexdigest()
 
     # If already exists ask what to do
-    if sample_exists(type=type, sha256=sha256sum) == "OK":
-        return redirect(url_for('default.choose', sha256=sha256sum, type=type))
+    if sample_exists(analysis_type=analysis_type, sha256=sha256sum) == "OK":
+        return redirect(url_for('default.choose', sha256=sha256sum, analysis_type=analysis_type))
 
     newfile = Sample.get_file_path(sha256sum)  # If it is the first time, save the file to the correct location
     file.stream.seek(0)  # Seek is needed because of the above file.stream.read()
@@ -50,43 +50,43 @@ def upload():
     chmod(newfile, 0o400)
 
     # Then analyse it and show results
-    analyser = Analyser(sha256=sha256sum, name=file.filename, type=type)
+    analyser = Analyser(sha256=sha256sum, name=file.filename, analysis_type=analysis_type)
     if analyser.analyse():
-        return redirect(url_for('default.analysis', sha256=sha256sum, type=type))
+        return redirect(url_for('default.analysis', sha256=sha256sum, analysis_type=analysis_type))
     else:
         return redirect(url_for('default.index'))
 
 
-@default.route('/choose/<type>/<sha256>', methods=['GET', 'POST'])
-def choose(type, sha256):
+@default.route('/choose/<analysis_type>/<sha256>', methods=['GET', 'POST'])
+def choose(analysis_type, sha256):
     """ Choose page """
     # Save filename
     Analyser.add_name(sha256, request.form.get("filename"))
-    return render_template('choose.html', sha256=sha256, type=type)
+    return render_template('choose.html', sha256=sha256, analysis_type=analysis_type)
 
 
-@default.route('/analysis/<type>/<sha256>')
-def analysis(type, sha256):
+@default.route('/analysis/<analysis_type>/<sha256>')
+def analysis(analysis_type, sha256):
     """ Analysis result page """
-    if type not in current_app.config.get('FILE_TYPES'):
-        # TODO Get most revelant analysis to show
-        return redirect(url_for('default.analysis', sha256=sha256, type=current_app.config.get('FILE_TYPES')[0]))
+    if analysis_type not in current_app.config.get('FILE_TYPES'):
+        # TODO Get most relevant analysis to show
+        return redirect(
+            url_for('default.analysis', sha256=sha256, analysis_type=current_app.config.get('FILE_TYPES')[0]))
     sample = Sample.query.filter_by(sha256=sha256).first()
     if sample is None:
         abort(404)
 
     suggest_reanalyse = datetime.datetime.utcnow() - sample.last_analysis > datetime.timedelta(days=90)
-    return render_template('analysis.html', sample=sample, type=type,
+    return render_template('analysis.html', sample=sample, analysis_type=analysis_type,
                            tag_list=Tag.get_all(), reanalyse=suggest_reanalyse)
 
 
-@default.route('/analyse/<type>/<sha256>', methods=['GET', 'POST'])
-def analyse(type, sha256):
+@default.route('/analyse/<analysis_type>/<sha256>', methods=['GET', 'POST'])
+def analyse(analysis_type, sha256):
     """ Reanalyse a sample """
     # TODO we should check for spamming users
-    analyser = Analyser(sha256=sha256, type=type)
-    analyser.analyse()
-    return redirect(url_for('default.analysis', sha256=sha256, type=type))
+    Analyser(sha256=sha256, analysis_type=analysis_type, analyse=True)
+    return redirect(url_for('default.analysis', sha256=sha256, analysis_type=analysis_type))
 
 
 @default.route('/login', methods=['GET', 'POST'])
@@ -118,19 +118,23 @@ def documentation():
 @default.route('/search/<page>', methods=['GET', 'POST'])
 def search_page(page):
     """ Search page """
-    page = int(page)
+    if page != 1:
+        try:
+            page = int(page[:10])
+        except ValueError:
+            page = -1
     query = request.form.get('search') or ''
     samples = search(query, page)
     return render_template('search.html', samples=samples)
 
 
-@default.route('/sample/<type>/<sha256>')
-def sample_exists(type, sha256):
+@default.route('/sample/<analysis_type>/<sha256>')
+def sample_exists(analysis_type, sha256):
     """ Returns OK if the file has already been analysed """
     sample = Sample.get(sha256)
     if sample is not None:
         for analysis in sample.analyzes:
-            if analysis.type == type:
+            if analysis.type == analysis_type:
                 return "OK"
     return "NOK"
 
