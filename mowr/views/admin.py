@@ -15,32 +15,16 @@ from mowr.analyzers.legit import Legit
 admin = Blueprint('admin', __name__, url_prefix='/admin', static_folder='../static_admin', static_url_path='/static')
 
 
+@admin.before_request
+def restrict_admin():
+    if 'login' not in session:
+        return redirect(url_for('default.login'))
+
+
 @admin.route('/')
 def index():
     """ Index page with statistics """
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        return render_template('admin/index.html', stats=getstats())
-    abort(404)
-
-
-@admin.route('/login', methods=['GET', 'POST'])
-def login():
-    """ Logs the user in """
-    if 'login' in session:
-        return redirect(url_for('admin.index'))
-
-    if request.method == 'POST':
-        # Check input
-        if request.form.get('password') == current_app.config['ADMIN_PASSWORD']:
-            if request.form.get('login') == current_app.config['ADMIN_LOGIN']:
-                session['login'] = request.form.get('login')
-                return redirect(url_for('admin.index'))
-        else:
-            flash('Sorry, are you sure about what you are doing ?', 'danger')
-
-    return render_template('admin/login.html')
+    return render_template('admin/index.html', stats=get_stats())
 
 
 @admin.route('/logout')
@@ -54,106 +38,80 @@ def logout():
 @admin.route('/samples/<int:page>', methods=['GET', 'POST'])
 def samples(page):
     """ Samples page """
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        query = request.form.get('search')
-        samples = search(query, page)
-        return render_template('admin/samples.html', samples=samples)
-    abort(404)
+    query = request.form.get('search') or ''
+    samples = search(query, page)
+    return render_template('admin/samples.html', samples=samples)
 
 
 @admin.route('/whitelist', methods=['GET', 'POST'])
 def whitelist():
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        if request.method == 'POST':
-            myfile = request.files.get('file')
-            if myfile is None or not myfile.filename:
-                flash('Please select a valid file.', 'warning')
-                return redirect(url_for('admin.whitelist'))
+    if request.method == 'POST':
+        myfile = request.files.get('file')
+        if myfile is None or not myfile.filename:
+            flash('Please select a valid file.', 'warning')
+            return redirect(url_for('admin.whitelist'))
 
-            # Save the file and unzip it
-            filename = secure_filename(myfile.filename)
-            saveloc = os.path.join(current_app.config.get('UPLOAD_FOLDER'), filename)
-            try:
-                myfile.save(saveloc)
-            except OSError:
-                flash('Error while saving the file. Aborting.', 'error')
+        # Save the file and unzip it
+        filename = secure_filename(myfile.filename)
+        saveloc = os.path.join(current_app.config.get('UPLOAD_FOLDER'), filename)
+        try:
+            myfile.save(saveloc)
+        except OSError:
+            flash('Error while saving the file. Aborting.', 'error')
 
-            analyse_type = request.form.get('type')
-            zipfile = Legit(saveloc, analyse_type)
-            zipfile.analyse()
-            os.remove(saveloc)
-        return render_template('admin/whitelist.html', file_types=current_app.config.get('FILE_TYPES'))
-    abort(404)
+        analyse_type = request.form.get('type')
+        zipfile = Legit(saveloc, analyse_type)
+        zipfile.analyse()
+        os.remove(saveloc)
+    return render_template('admin/whitelist.html', file_types=current_app.config.get('FILE_TYPES'))
 
 
 @admin.route('/tags')
 def tags():
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        tag_list = Tag.get_all()
-        return render_template('admin/tags.html', tags=tag_list)
-    abort(404)
+    tag_list = Tag.get_all()
+    return render_template('admin/tags.html', tags=tag_list)
 
 
 @admin.route('/tags/add', methods=['GET', 'POST'])
 def add_tag():
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        if request.method == 'POST':
-            name = request.form.get('name')
-            color = request.form.get('color')
-            tag = Tag(name, color)
-            db.session.add(tag)
-            db.session.commit()
-            return redirect(url_for('admin.tags'))
-        return render_template('admin/add_tag.html', tag=None)
-    abort(404)
+    if request.method == 'POST':
+        name = request.form.get('name')
+        color = request.form.get('color')
+        tag = Tag(name, color)
+        db.session.add(tag)
+        db.session.commit()
+        return redirect(url_for('admin.tags'))
+    return render_template('admin/add_tag.html', tag=None)
 
 
 @admin.route('/tags/delete/<id>')
 def delete_tag(id):
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        tag = Tag.get(id)
-        db.session.delete(tag)
-        db.session.commit()
-        return redirect(request.referrer)
-    abort(404)
+    tag = Tag.get(id)
+    db.session.delete(tag)
+    db.session.commit()
+    return redirect(request.referrer)
 
 
 @admin.route('/tags/edit/<id>', methods=['GET', 'POST'])
 def edit_tag(id):
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
-    elif session.get('login') == current_app.config['ADMIN_LOGIN']:
-        tag = Tag.get(id)
-        if request.method == 'POST':
-            name = request.form.get('name')
-            color = request.form.get('color')
-            tag.name = name
-            tag.color = color
-            db.session.add(tag)
-            db.session.commit()
-            return redirect(url_for('admin.tags'))
-        else:
-            return render_template('admin/add_tag.html', tag=tag)
-    abort(404)
+    tag = Tag.get(id)
+    if request.method == 'POST':
+        name = request.form.get('name')
+        color = request.form.get('color')
+        tag.name = name
+        tag.color = color
+        db.session.add(tag)
+        db.session.commit()
+        return redirect(url_for('admin.tags'))
+    else:
+        return render_template('admin/add_tag.html', tag=tag)
 
 
 @admin.route('/delete/<sha256>')
 def delete(sha256):
     """ Delete a sample from harddrive and database """
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
     sample = Sample.get(sha256)
-    if session.get('login') == current_app.config['ADMIN_LOGIN'] and sample is not None:
+    if sample:
         for tag in sample.tags:
             db.session.delete(tag)
         for analysis in sample.analyzes:
@@ -172,10 +130,8 @@ def delete(sha256):
 @admin.route('/edit/<sha256>', methods=['GET', 'POST'])
 def edit(sha256):
     """ Edit a sample metadata """
-    if 'login' not in session:
-        return redirect(url_for('admin.login'))
     sample = Sample.get(sha256)
-    if session.get('login') == current_app.config['ADMIN_LOGIN'] and sample:
+    if sample:
         all_tags = Tag.get_all()
         if request.method == 'POST':
             # Reformat what is needed
@@ -220,7 +176,7 @@ def edit(sha256):
     abort(404)
 
 
-def getstats():
+def get_stats():
     """ Returns a dict containing statistics """
     # Samples infos
     # Count samples in the database
@@ -285,7 +241,8 @@ def getstats():
 
     # File types
     # Get mime types from database
-    rates = db.session.query(db.func.count(Sample.mime), Sample.mime).group_by(Sample.mime).all()
+    count = db.func.count(Sample.mime).label('nb')
+    rates = db.session.query(count, Sample.mime).group_by(Sample.mime).order_by(count.desc()).all()
     stats = []
     types = []
     for i, v in rates:

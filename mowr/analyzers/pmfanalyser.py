@@ -18,7 +18,7 @@ class PmfAnalyser(Analysis):
     def analyse(self):
         """ Analyse the file with PMF """
         start = time.time()
-        rule_file = os.path.join(current_app.config.get('PMF_PATH'), self.type.lower(), '.yar')
+        rule_file = os.path.join(current_app.config.get('PMF_PATH'), self.type.lower() + '.yar')
         rules = yara.compile(rule_file)
 
         try:

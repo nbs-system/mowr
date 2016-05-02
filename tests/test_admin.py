@@ -14,7 +14,7 @@ class AdminTestCase(unittest.TestCase):
         self.app = app.test_client()
 
     def login(self):
-        return self.app.post('/admin/login', data=dict(
+        return self.app.post('/login', data=dict(
             login=self.config.get('ADMIN_LOGIN'),
             password=self.config.get('ADMIN_PASSWORD')
         )).data.decode('utf-8')
@@ -22,11 +22,11 @@ class AdminTestCase(unittest.TestCase):
     def test_login(self):
         """ Test login form """
         # Upload without any data
-        rv = self.app.post('/admin/login', follow_redirects=True).data.decode('utf-8')
+        rv = self.app.post('/login', follow_redirects=True).data.decode('utf-8')
         self.assertIn('Sorry, are you sure about what you are doing ?', rv)
 
         # Insert wrong username/password
-        rv = self.app.post('/admin/login', data=dict(
+        rv = self.app.post('/login', data=dict(
             login='wut',
             password='wutwut'
         ), follow_redirects=True).data.decode('utf-8')
@@ -37,7 +37,7 @@ class AdminTestCase(unittest.TestCase):
         self.assertIn('You should be redirected automatically to target URL: <a href="/admin/">/admin/</a>', rv)
 
         # Try to connect while already connected
-        rv = self.app.post('/admin/login').data.decode('utf-8')
+        rv = self.app.post('/login').data.decode('utf-8')
         self.assertIn('You should be redirected automatically to target URL: <a href="/admin/">/admin/</a>', rv)
 
     def test_logout(self):
@@ -47,7 +47,7 @@ class AdminTestCase(unittest.TestCase):
         self.app.get('/admin/logout')
         rv = self.app.get('/admin/').data.decode('utf-8')
         self.assertIn(
-            'You should be redirected automatically to target URL: <a href="/admin/login">/admin/login</a>', rv)
+            'You should be redirected automatically to target URL: <a href="/login">/login</a>', rv)
 
     def test_index(self):
         """ Test admin index """
@@ -73,7 +73,7 @@ class AdminTestCase(unittest.TestCase):
 
         # Access without being logged in
         rv = self.app.get('/admin/').data.decode('utf-8')
-        self.assertIn('You should be redirected automatically to target URL: <a href="/admin/login">/admin/login</a>',
+        self.assertIn('You should be redirected automatically to target URL: <a href="/login">/login</a>',
                       rv)
 
         # Log in and access it
@@ -86,7 +86,7 @@ class AdminTestCase(unittest.TestCase):
     def test_samples(self):
         # Access the page with no authentication
         rv = self.app.get('/admin/samples').data.decode('utf-8')
-        self.assertIn('You should be redirected automatically to target URL: <a href="/admin/login">/admin/login</a>',
+        self.assertIn('You should be redirected automatically to target URL: <a href="/login">/login</a>',
                       rv)
 
         # Log in
