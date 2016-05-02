@@ -9,8 +9,8 @@ from mowr.models.sample import Sample
 
 
 class PmfAnalyser(Analysis):
-    def __init__(self, type, sha256):
-        self.type = type  # FIXME plz do not redefine builtins
+    def __init__(self, analysis_type, sha256):
+        self.type = analysis_type  # FIXME plz do not redefine builtins
         self.soft = 'PMF'
         self.sample_sha256 = sha256
         self.analyse()
