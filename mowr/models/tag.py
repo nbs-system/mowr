@@ -27,7 +27,7 @@ class Tag(db.Model):
         return '<a class="label label-' + self.color + '" href="#">' + self.name + '</a>'
 
     @validates('name')
-    def validate_name(self, key, name):  # FIXME change the name of the function, we don't validate here.
+    def format_name(self, key, name):
         return name[:25]
 
     @validates('color')
