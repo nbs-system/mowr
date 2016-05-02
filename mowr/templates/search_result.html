@@ -27,7 +27,7 @@ Page: {{ samples.page }}
             </td>
             <td>{{ sample.first_analysis }}</td>
             <td>{{ sample.last_analysis }}</td>
-            <td>{% for tag in sample.tags %}{{ tag.format()|safe }}{% endfor %}</td>
+            <td>{% for tag in sample.tags %}{{ tag|safe }}{% endfor %}</td>
         </tr>
     {% endfor %}
     </tbody>

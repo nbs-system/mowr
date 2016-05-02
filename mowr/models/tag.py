@@ -1,3 +1,4 @@
+import six
 from sqlalchemy.orm import validates
 
 from mowr import db
@@ -22,23 +23,26 @@ class Tag(db.Model):
         self.name = name
         self.color = color
 
+    def __str__(self):
+        return '<a class="label label-' + self.color + '" href="#">' + self.name + '</a>'
+
     @validates('name')
     def validate_name(self, key, name):  # FIXME change the name of the function, we don't validate here.
         return name[:25]
 
-    @validates('color')  # FIXME use str.translate()
+    @validates('color')
     def validate_color(self, key, color):
         pattern = '"\'<>'
-        color = ''.join([c for c in color if c not in pattern])
+        if six.PY2:
+            color = color.translate(None, pattern)
+        else:
+            color = color.translate(str.maketrans(dict.fromkeys(pattern, None)))
         return color[:10]
 
     @staticmethod
-    def get_all():
-        return Tag.query.all()  # FIXME: use `self` instead? If not, document why.
+    def get_all():  # Should stay static
+        return Tag.query.all()
 
     @staticmethod
     def get(id):
         return Tag.query.filter_by(id=id).first()
-
-    def format(self):  # FIXME use __str__ instead
-        return '<a class="label label-' + self.color + '" href="#">' + self.name + '</a>'

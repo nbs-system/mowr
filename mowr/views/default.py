@@ -69,7 +69,6 @@ def choose(analysis_type, sha256):
 def analysis(analysis_type, sha256):
     """ Analysis result page """
     if analysis_type not in current_app.config.get('FILE_TYPES'):
-        # TODO Get most relevant analysis to show
         return redirect(
             url_for('default.analysis', sha256=sha256, analysis_type=current_app.config.get('FILE_TYPES')[0]))
     sample = Sample.query.filter_by(sha256=sha256).first()
