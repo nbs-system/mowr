@@ -55,10 +55,6 @@ def create_app(config_filename=''):
         logging.error("Could not connect to the database. Check your configuration and server settings.")
         exit(1)
 
-    # Drop and create database because it's fun
-    #db.drop_all()
-    db.create_all()
-
     # Error handlers
     @app.errorhandler(404)
     def page_not_found(e):

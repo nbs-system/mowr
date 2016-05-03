@@ -1,4 +1,4 @@
-<div id="navigation">
+<div class="navigation">
 <a href="{{ url_for('default.search_page', page=samples.prev_num) }}" class="btn btn-primary"
 {% if not samples.has_prev %}style="visibility: hidden"{% endif %}>Previous</a>
 <a href="{{ url_for('default.search_page', page=samples.next_num) }}" class="btn btn-primary"
@@ -9,11 +9,11 @@ Page: {{ samples.page }}
 <table class="table table-bordered">
     <thead>
     <tr>
-        <td>Original name</td>
-        <td>SHA256</td>
-        <td>First analysis</td>
-        <td>Last analysis</td>
-        <td>Tags</td>
+        <th>Original name</th>
+        <th>SHA256</th>
+        <th>First analysis</th>
+        <th>Last analysis</th>
+        <th>Tags</th>
     </tr>
     </thead>
     <tbody>
@@ -27,7 +27,7 @@ Page: {{ samples.page }}
             </td>
             <td>{{ sample.first_analysis }}</td>
             <td>{{ sample.last_analysis }}</td>
-            <td>{% for tag in sample.tags %}{{ tag|safe }}{% endfor %}</td>
+            <td>{% for tag in sample.tags %}{{ tag|safe }} {% endfor %}</td>
         </tr>
     {% endfor %}
     </tbody>
