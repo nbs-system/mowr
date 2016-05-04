@@ -31,7 +31,7 @@ class Tag(db.Model):
         return name[:25]
 
     @validates('color')
-    def validate_color(self, key, color):
+    def format_color(self, key, color):
         color = six.moves.urllib.parse.quote(color)
         return color[:10]
 

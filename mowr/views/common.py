@@ -12,7 +12,7 @@ PER_PAGE = 20
 
 def search(query='', page=1):  # TODO factorize/simplify
     """ Search for a sample matching query
-
+     :param int page: The page to show
      :param str query: The search query
      """
     if ':' in query:
@@ -49,7 +49,6 @@ def search(query='', page=1):  # TODO factorize/simplify
                     .join(Tag,
                           Tag.id == tags.c.tag_id) \
                     .all()
-                print(samples)
             else:
                 req.append(getattr(Sample, prefix).like('%{val}%'.format(val=value)))
         # Execute the query
