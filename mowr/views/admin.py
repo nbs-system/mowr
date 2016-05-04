@@ -135,6 +135,8 @@ def edit(sha256):
 
             tag_list = []
             for i, tag_name in enumerate(tag_input):
+                if not tag_name:
+                    continue
                 if tag_name not in (tag.name for tag in all_tags):
                     flash('The tag %s is not in the allowed tags list.' % tag_name, 'error')
                     return redirect(url_for('admin.edit', sha256=sha256))
@@ -192,7 +194,7 @@ def get_stats():
     dateList = list()
     nb_samples_per_day = list()
 
-    for day_num in range(7, 0, -1):
+    for day_num in range(6, -1, -1):
         day = today - datetime.timedelta(days=day_num)
         next_day = day + datetime.timedelta(days=1)
 
@@ -209,7 +211,7 @@ def get_stats():
     stats, types = [], []
     for i, v in rates:
         stats.append(int(i))
-        types.append(v if six.PY2 else v.encode('utf-8'))
+        types.append(v.encode('utf-8') if six.PY2 else v)
 
     file_type = dict(stats=stats, types=types)
 

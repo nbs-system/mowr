@@ -29,7 +29,7 @@ Page: {{ samples.page }}
             </td>
             <td>{{ sample.first_analysis }}</td>
             <td>{{ sample.last_analysis }}</td>
-            <td>{% for tag in sample.tags %}{{ tag|safe }}{% endfor %}</td>
+            <td>{% for tag in sample.tags %}{{ tag|safe }} {% endfor %}</td>
             <td><a href="{{ url_for('admin.edit', sha256=sample.sha256) }}"><span
                     class="glyphicon glyphicon-edit"></span></a></td>
             <td><a href="{{ url_for('admin.delete', sha256=sample.sha256) }}"><span
