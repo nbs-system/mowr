@@ -93,7 +93,7 @@ class Sample(db.Model):
 
     def compute_entropy(self, buf):
         """ Compute Shanon's entropy ( https://rosettacode.org/wiki/Entropy#Python:_More_succinct_version )
-        :param str buf: The thing on which we compute the entropy
+        :param str or byte buf: The thing on which we compute the entropy
         :return int : Shanon's entropy of `buf`
         """
         p, lns = Counter(buf), float(len(buf))
