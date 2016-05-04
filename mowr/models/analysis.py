@@ -14,9 +14,8 @@ class Analysis(db.Model):
 
     @validates('analysis_time')
     def validate_analysis_time(self, key, analysis_time):
-        if not isinstance(analysis_time, (int, float)):
-            try:
-                analysis_time = int(analysis_time)
-            except ValueError:
-                analysis_time = 0
+        try:
+            analysis_time = int(analysis_time)
+        except ValueError:
+            analysis_time = 0
         return analysis_time

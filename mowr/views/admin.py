@@ -1,5 +1,6 @@
 import os
-from datetime import datetime
+import datetime
+import collections
 
 import six
 from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
@@ -38,8 +39,7 @@ def logout():
 @admin.route('/samples/<int:page>', methods=['GET', 'POST'])
 def samples(page):
     """ Samples page """
-    query = request.form.get('search') or ''
-    samples = search(query, page)
+    samples = search(request.form.get('search', ''), page)
     return render_template('admin/samples.html', samples=samples)
 
 
@@ -52,15 +52,13 @@ def whitelist():
             return redirect(url_for('admin.whitelist'))
 
         # Save the file and unzip it
-        filename = secure_filename(myfile.filename)
-        saveloc = os.path.join(current_app.config.get('UPLOAD_FOLDER'), filename)
+        saveloc = os.path.join(current_app.config.get('UPLOAD_FOLDER'), secure_filename(myfile.filename))
         try:
             myfile.save(saveloc)
         except OSError:
             flash('Error while saving the file. Aborting.', 'error')
 
-        analyse_type = request.form.get('type')
-        zipfile = Legit(saveloc, analyse_type)
+        zipfile = Legit(saveloc, request.form.get('type', ''))
         zipfile.analyse()
         os.remove(saveloc)
     return render_template('admin/whitelist.html', file_types=current_app.config.get('FILE_TYPES'))
@@ -75,9 +73,7 @@ def tags():
 @admin.route('/tags/add', methods=['GET', 'POST'])
 def add_tag():
     if request.method == 'POST':
-        name = request.form.get('name')
-        color = request.form.get('color')
-        tag = Tag(name, color)
+        tag = Tag(request.form.get('name', ''), request.form.get('color', ''))
         db.session.add(tag)
         db.session.commit()
         return redirect(url_for('admin.tags'))
@@ -100,35 +96,32 @@ def edit_tag(tag_id):
     if not tag:
         abort(404)
     elif request.method == 'POST':
-        name = request.form.get('name')
-        color = request.form.get('color')
-        tag.name = name
-        tag.color = color
+        tag.name = request.form.get('name', '')
+        tag.color = request.form.get('color', '')
         db.session.add(tag)
         db.session.commit()
         return redirect(url_for('admin.tags'))
-    else:
-        return render_template('admin/add_tag.html', tag=tag)
+    return render_template('admin/add_tag.html', tag=tag)
 
 
 @admin.route('/delete/<sha256>')
 def delete(sha256):
     """ Delete a sample from harddrive and database """
     sample = Sample.get(sha256)
-    if sample:
-        for tag in sample.tags:
-            db.session.delete(tag)
-        for analysis in sample.analyzes:
-            db.session.delete(analysis)
-        db.session.delete(sample)
-        db.session.commit()
-        try:
-            os.remove(Sample.get_file_path(sha256))
-        except OSError:
-            flash('Could not delete the file from the file system.', 'danger')
-        flash('The file %s has been deleted. Are you happy now ?' % sha256, 'success')
-        return redirect(request.referrer)
-    abort(404)
+    if not sample:
+        abort(404)
+    for tag in sample.tags:
+        db.session.delete(tag)
+    for analysis in sample.analyzes:
+        db.session.delete(analysis)
+    db.session.delete(sample)
+    db.session.commit()
+    try:
+        os.remove(Sample.get_file_path(sha256))
+    except OSError:
+        flash('Could not delete the file from the file system.', 'danger')
+    flash('The file %s has been deleted. Are you happy now ?' % sha256, 'success')
+    return redirect(request.referrer)
 
 
 @admin.route('/edit/<sha256>', methods=['GET', 'POST'])
@@ -137,40 +130,21 @@ def edit(sha256):
     sample = Sample.get(sha256)
     if sample:
         all_tags = Tag.get_all()
-        if request.method == 'POST':
-            # Reformat what is needed
-            name = request.form.get('name').replace(' ', '').split(',')
-            mime = request.form.get('mime')
-            first_analysis = request.form.get('first_analysis')
-            last_analysis = request.form.get('last_analysis')
-            tag_input = request.form.get('tags').replace(' ', '').split(',')
-            analyzes = []
-            for analysis in sample.analyzes:
-                time = request.form.get(
-                    '{type}_{soft}_analysis_time'.format(type=analysis.type, soft=analysis.soft)).replace(' ', '')
-                result = request.form.get(
-                    '{type}_{soft}_result'.format(type=analysis.type, soft=analysis.soft))
-                analysis.analysis_time = time
-                analysis.result = result
-                analyzes.append(analysis)
+        if request.method == 'POST':  # Reformat what is needed
+            tag_input = request.form.get('tags', '').replace(' ', '').split(',')
 
-            # Check inputs
-            available_tags = [tag.name for tag in all_tags]
             tag_list = []
             for i, tag_name in enumerate(tag_input):
-                if len(tag_input) == 1 and tag_input[0] == '':
-                    break
-                if tag_name not in available_tags:
+                if tag_name not in (tag.name for tag in all_tags):
                     flash('The tag %s is not in the allowed tags list.' % tag_name, 'error')
                     return redirect(url_for('admin.edit', sha256=sha256))
                 tag_list.append(all_tags[i])
 
             # Update2
-            sample.name = name
-            sample.mime = mime,
-            sample.first_analysis = first_analysis,
-            sample.last_analysis = last_analysis,
-            sample.analyzes = analyzes
+            sample.name = request.form.get('name', '').replace(' ', '').split(',')
+            sample.mime = request.form.get('mime', '')
+            sample.first_analysis = request.form.get('first_analysis', '')
+            sample.last_analysis = request.form.get('last_analysis', '')
             sample.tags = tag_list
             db.session.add(sample)
             db.session.commit()
@@ -181,89 +155,62 @@ def edit(sha256):
 
 
 def get_stats():
-    """ Returns a dict containing statistics """
-    # Samples infos
-    # Count samples in the database
-    samplesNb = Sample.query.count()
-    # Get clean and malicious files
-    malicious = [analysis.sample_sha256 for analysis in Analysis.query.filter_by(result='').all()]
-    clean_number = Analysis.query.filter(
-        Analysis.result != '',
-        ~Analysis.sample_sha256.in_(malicious)
-    ).count()
-    malicious_number = samplesNb - clean_number
-    try:
-        ratio = malicious_number * 100 / samplesNb
-    except ZeroDivisionError:
-        ratio = 0
+    """
+     :return dict of dict: Various statistics
+     """
 
-    # Get average time
+    # Count samples in the database
+    samples_nb = Sample.query.count()
+    if not samples_nb:
+        return collections.defaultdict(lambda: collections.defaultdict(int))
+
+    # Get clean and malicious files amounts
+    malicious = [analysis.sample_sha256 for analysis in Analysis.query.filter_by(result='').all()]
+    clean_number = Analysis.query.filter(~Analysis.sample_sha256.in_(malicious)).count()
+    malicious_number = samples_nb - clean_number
+    ratio = malicious_number * 100.0 / samples_nb
+
+    # Get average analyse time
     average_time = db.session.query(db.func.avg(Analysis.analysis_time)).first()[0]
     average_time *= 1000  # To milliseconds
     average_time = '%.3f' % average_time  # Truncate
 
-    samples = dict(
-        nb=samplesNb,
-        ratio=ratio,
-        average_time=average_time
-    )
+    samples = dict(nb=samples_nb, ratio=ratio, average_time=average_time)
 
-    # Disk usage
-    # Count the samples size
-    file_size = sum(os.path.getsize('{0}/{1}'.format(current_app.config['UPLOAD_FOLDER'], f)) for f in
-                    os.listdir(current_app.config['UPLOAD_FOLDER']))
-    st = os.statvfs(current_app.config.get('UPLOAD_FOLDER'))
-    # Compute free space
+    # Compute the samples on-disk size
+    up_folder = current_app.config.get('UPLOAD_FOLDER')
+    file_size = sum(os.path.getsize(os.path.join(up_folder, f)) for f in os.listdir(up_folder))
+    st = os.statvfs(up_folder)
+
+    # Compute the remaining free space
     remaining_storage = st.f_bavail * st.f_frsize
 
-    diskUsage = dict(
-        file_size=file_size,
-        remaining_storage=remaining_storage
-    )
+    disk_usage = dict(file_size=file_size, remaining_storage=remaining_storage)
 
-    # Graph 1
     # Last 7 days dates from oldest to newest
-    if six.PY2:
-        dateList = list(reversed(
-            [datetime.fromtimestamp((datetime.utcnow() - datetime.fromtimestamp(0)).total_seconds() - 3600 * 24 * i) for
-             i in range(7)]))
-    else:
-        dateList = list(
-            reversed([datetime.fromtimestamp(datetime.utcnow().timestamp() - 3600 * 24 * i) for i in range(7)]))
-    dateList = [i.replace(minute=0, hour=0, second=0, microsecond=0) for i in dateList]
-    # Count the samples
-    data1 = [Sample.query.filter(Sample.first_analysis >= dateList[i], Sample.first_analysis < dateList[i + 1]).count()
-             for i in range(len(dateList) - 1)]
-    data1.append(Sample.query.filter(Sample.first_analysis >= dateList[len(dateList) - 1]).count())
+    today = datetime.datetime.today().replace(minute=0, hour=0, second=0, microsecond=0)
+    dateList = list()
+    nb_samples_per_day = list()
 
-    samplesChart = dict(
-        # Get only the year-day-month
-        dateList=[i.date().isoformat() for i in dateList],
-        data1=[int(d) for d in data1],
-        data2=[0] * 7
-    )
+    for day_num in range(7, 0, -1):
+        day = today - datetime.timedelta(days=day_num)
+        next_day = day + datetime.timedelta(days=1)
 
-    # File types
+        nb_samples = Sample.query.filter(Sample.first_analysis >= day, Sample.first_analysis < next_day).count()
+        nb_samples_per_day.append(int(nb_samples))
+
+        dateList.append(day.date().isoformat())
+
+    samples_chart = dict(dateList=dateList, data1=nb_samples_per_day)
+
     # Get mime types from database
     count = db.func.count(Sample.mime).label('nb')
     rates = db.session.query(count, Sample.mime).group_by(Sample.mime).order_by(count.desc()).all()
-    stats = []
-    types = []
+    stats, types = [], []
     for i, v in rates:
         stats.append(int(i))
-        if six.PY2:
-            types.append(v.encode('utf-8'))
-        else:
-            types.append(v)
+        types.append(v if six.PY2 else v.encode('utf-8'))
 
-    fileType = dict(
-        stats=stats,
-        types=types
-    )
+    file_type = dict(stats=stats, types=types)
 
-    return dict(
-        samples=samples,
-        samplesChart=samplesChart,
-        diskUsage=diskUsage,
-        fileType=fileType
-    )
+    return dict(samples=samples, samplesChart=samples_chart, diskUsage=disk_usage, fileType=file_type)

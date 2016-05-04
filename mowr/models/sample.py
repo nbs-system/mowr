@@ -48,9 +48,7 @@ class Sample(db.Model):
 
     @validates('mime')
     def validate(self, key, mime):
-        if mime is None:
-            return mime
-        return mime[:50]
+        return None if not mime else mime[:50]
 
     @staticmethod
     def get_file_path(sha256sum):
@@ -60,7 +58,6 @@ class Sample(db.Model):
     @staticmethod
     def get(sha256):
         """ Get the sample having this sha256
-        :rtype: Sample
         :return Sample: If sha256 already in database
         :return None: If not found
         """
@@ -68,14 +65,14 @@ class Sample(db.Model):
 
     def compute_hashes(self):
         """ Compute the file hashes """
-        self.filename = self.get_file_path(self.sha256)
+        filename = self.get_file_path(self.sha256)
 
         # Make sure the file exists and is readable
-        if not os.access(self.filename, os.R_OK):
+        if not os.access(filename, os.R_OK):
             flash('There was an error while trying to analyse the file.', 'danger')
             return False
 
-        with open(self.filename, 'rb') as f:
+        with open(filename, 'rb') as f:
             buf = f.read()
 
         if self.sha256 is None:

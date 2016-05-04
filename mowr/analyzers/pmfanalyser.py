@@ -22,13 +22,12 @@ class PmfAnalyser(Analysis):
         rules = yara.compile(rule_file)
 
         try:
-            file = open(Sample.get_file_path(self.sample_sha256), 'rb')
+            with open(Sample.get_file_path(self.sample_sha256), 'rb') as f:
+                matches = rules.match(data=f.read())
         except OSError:
             flash('Error while reanalysing the file.', 'danger')
             return False
 
-        matches = rules.match(data=file.read())
-        file.close()
         self.analysis_time = time.time() - start
         self.result = ' '.join(map(str, matches))
         return True

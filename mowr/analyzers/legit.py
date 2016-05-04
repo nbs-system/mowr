@@ -17,7 +17,7 @@ class Legit(object):
 
     def analyse(self):
         if not zipfile.is_zipfile(self.path):
-            flash('The file you sent is not a valid zip file.', 'error')
+            flash('The file you sent is not a valid zip file.', 'danger')
             return False
 
         archive = zipfile.ZipFile(self.path)
