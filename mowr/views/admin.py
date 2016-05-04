@@ -84,18 +84,22 @@ def add_tag():
     return render_template('admin/add_tag.html', tag=None)
 
 
-@admin.route('/tags/delete/<id>')
-def delete_tag(id):
-    tag = Tag.get(id)
+@admin.route('/tags/delete/<int:tag_id>')
+def delete_tag(tag_id):
+    tag = Tag.get(tag_id)
+    if not tag:
+        abort(404)
     db.session.delete(tag)
     db.session.commit()
     return redirect(request.referrer)
 
 
-@admin.route('/tags/edit/<id>', methods=['GET', 'POST'])
-def edit_tag(id):
-    tag = Tag.get(id)
-    if request.method == 'POST':
+@admin.route('/tags/edit/<int:tag_id>', methods=['GET', 'POST'])
+def edit_tag(tag_id):
+    tag = Tag.get(tag_id)
+    if not tag:
+        abort(404)
+    elif request.method == 'POST':
         name = request.form.get('name')
         color = request.form.get('color')
         tag.name = name

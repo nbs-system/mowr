@@ -25,7 +25,7 @@ def search(query='', page=1):  # TODO factorize/simplify
         subq, subq2 = None, None
         tags = None
         for i in range(0, len(elems), 2):
-            prefix, value = elems[i:i+1]
+            prefix, value = elems[i:i+2]
             if prefix not in ['name', 'md5', 'sha1', 'sha256', 'first_analysis', 'last_analysis', 'tags']:
                 continue
             elif prefix in ['first_analysis', 'last_analysis']:

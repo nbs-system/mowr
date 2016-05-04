@@ -18,9 +18,9 @@
                     <td>{{ tag.name }}</td>
                     <td>{{ tag.color }}</td>
                     <td>{{ tag|safe }}</td>
-                    <td><a href="{{ url_for('admin.edit_tag', id=tag.id) }}"><span
+                    <td><a href="{{ url_for('admin.edit_tag', tag_id=tag.id) }}"><span
                             class="glyphicon glyphicon-edit"></span></a></td>
-                    <td><a href="{{ url_for('admin.delete_tag', id=tag.id) }}"><span
+                    <td><a href="{{ url_for('admin.delete_tag', tag_id=tag.id) }}"><span
                             class="glyphicon glyphicon-trash"></span></a></td>
                 </tr>
             {% endfor %}

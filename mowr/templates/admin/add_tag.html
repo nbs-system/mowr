@@ -4,10 +4,11 @@
         <div class="col-md-6">
             {% if not tag %}
                 <form method="post" action="{{ url_for('admin.add_tag') }}">
+                <h2>Add tag</h2>
             {% else %}
-                <form method="post" action="{{ url_for('admin.edit_tag', id=tag.id) }}">
-            {% endif %}
+                <form method="post" action="{{ url_for('admin.edit_tag', tag_id=tag.id) }}">
                 <h2>Edit tag : {{ tag.id }}</h2>
+            {% endif %}
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input id="name" type="text" name="name" class="form-control" value="{{ tag.name }}">
