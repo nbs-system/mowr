@@ -17,7 +17,7 @@ class Legit(object):
 
     def analyse(self):
         if not zipfile.is_zipfile(self.path):
-            flash('The file you sent is not a valid zip file.', 'warning')
+            flash('The file you sent is not a valid zip file.', 'error')
             return False
 
         archive = zipfile.ZipFile(self.path)
@@ -25,9 +25,9 @@ class Legit(object):
         for compressed_file in archive.infolist():
             size += compressed_file.file_size
             if size > MAX_SIZE:
-                flash("The size of the archive's content is too big !", 'warning')
+                flash("The size of the archive's content is too big !", 'danger')
                 return False
-            elif compressed_file.filename.lower().endswith(('.{ext}'.format(ext=self.analysis.lower()))):
+            elif compressed_file.filename.lower().endswith('.' + self.analysis.lower()):
                 path = archive.extract(compressed_file, current_app.config.get('UPLOAD_FOLDER'))
                 with open(path, 'rb') as f:
                     buf = f.read()
