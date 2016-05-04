@@ -32,11 +32,7 @@ class Tag(db.Model):
 
     @validates('color')
     def validate_color(self, key, color):
-        pattern = '"\'<>'
-        if six.PY2:
-            color = color.translate(None, pattern)
-        else:
-            color = color.translate(str.maketrans(dict.fromkeys(pattern, None)))
+        color = six.moves.urllib.parse.quote(color)
         return color[:10]
 
     @staticmethod
