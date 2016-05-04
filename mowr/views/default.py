@@ -19,7 +19,7 @@ def upload():
     # Check file param
     file = request.files.get('file')
     if file is None or not file.filename:
-        flash('Please select a valid file.', 'warning')
+        flash('Please select a valid file.', 'danger')
         return redirect(url_for('default.index'))
 
     analysis_type = request.form.get('type')
@@ -32,8 +32,7 @@ def upload():
         abort(413)
 
     # Check the file sha256 and if it has already been analysed
-    file_content = file.stream.read()
-    sha256sum = sha256(file_content).hexdigest()
+    sha256sum = sha256(file.stream.read()).hexdigest()
 
     # If already exists ask what to do
     if sample_exists(analysis_type=analysis_type, sha256=sha256sum) == "OK":
@@ -114,16 +113,11 @@ def documentation():
 
 
 @default.route('/search', defaults={'page': 1}, methods=['GET', 'POST'])
-@default.route('/search/<page>', methods=['GET', 'POST'])
+@default.route('/search/<int:page>', methods=['GET', 'POST'])
 def search_page(page):
     """ Search page """
-    if page != 1:
-        try:
-            page = int(page[:10])
-        except ValueError:
-            page = -1
-    query = request.form.get('search') or ''
-    samples = search(query, page)
+    page %= 32766  # because postgre
+    samples = search(request.form.get('search', ''), page)
     return render_template('search.html', samples=samples)
 
 
@@ -131,7 +125,7 @@ def search_page(page):
 def sample_exists(analysis_type, sha256):
     """ Returns OK if the file has already been analysed """
     sample = Sample.get(sha256)
-    if sample is not None:
+    if sample:
         for analysis in sample.analyzes:
             if analysis.type == analysis_type:
                 return "OK"
@@ -150,29 +144,22 @@ def submit_tag(sha256, tag, format):
     if sample is None or tag in sample_tag_names:
         return "NOK"
 
-    tag = tag_names.index(tag)
-    tag = tags[tag]
-    sample.tags.append(tag)
+    sample.tags.append(tags[tag_names.index(tag)])  # postgre doesn't like str as objects.
     db.session.commit()
-    if format:
-        return str(tag)
-    return "OK"
+    return tag if format else 'OK'
 
 
 @default.route('/vote/<sha256>/<mode>')
 def vote(sha256, mode):
-    if session.get('can_vote') == sha256:
+    if session.get('can_vote') == sha256 and mode in ('clean', 'malicious'):
         session.pop('can_vote', None)
+        sample = Sample.query.filter_by(sha256=sha256).first()
         if mode == 'clean':
-            sample = Sample.query.filter_by(sha256=sha256).first()
             sample.vote_clean += 1
-            db.session.commit()
-            return "OK"
         elif mode == 'malicious':
-            sample = Sample.query.filter_by(sha256=sha256).first()
             sample.vote_malicious += 1
-            db.session.commit()
-            return "OK"
+        db.session.commit()
+        return "OK"
     return "NOK"
 
 
