@@ -13,7 +13,7 @@ from mowr.views.common import search
 from mowr.models.tag import Tag
 from mowr.analyzers.legit import Legit
 
-admin = Blueprint('admin', __name__, url_prefix='/admin', static_folder='../static_admin', static_url_path='/static')
+admin = Blueprint('admin', __name__, url_prefix='/admin')
 
 
 @admin.before_request

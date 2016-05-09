@@ -144,9 +144,10 @@ def submit_tag(sha256, tag, format):
     if sample is None or tag in sample_tag_names:
         return "NOK"
 
-    sample.tags.append(tags[tag_names.index(tag)])  # postgre doesn't like str as objects.
+    _tag = tags[tag_names.index(tag)]
+    sample.tags.append(_tag)  # postgre doesn't like str as objects.
     db.session.commit()
-    return tag if format else 'OK'
+    return str(_tag) if format else 'OK'
 
 
 @default.route('/vote/<sha256>/<mode>')
