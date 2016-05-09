@@ -1,13 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Documentation</h1>
-    <h2>Basics</h2>
     MOWR is a virustotal-like web application aiming at helping to detect malicious web files. It uses
     <a href="https://github.com/nbs-system/php-malware-finder">PMF</a> to detect the samples as malicious or not.
     To use it simply drag and drop a file in the drop zone or click it to browse your computer. Then MOWR will
     automatically download your file and scan it.
 
-    <h2>Tags</h2>
+    <h2>File analysis</h2>
+    Before selecting your file, make sure you selected the correct analysis type (PHP or ASP).
+    Then, drag and drop it on the dropzone or click it to browse your file system and choose a file to upload.
+
+    <h2>Search field</h2>
+    You can <a href="{{ url_for('default.search_page') }}">search</a> for a file specifying its name or its sha256.
+    You can make more precise searches using the prefix system.
+    For instance you can do `name:php` and it will get you all the files containing php in their names.
+    You can also search for a <a href="#tags">tag</a> like this `tag:Scanner`. Be careful, the tag name is case sensitive.
+    Of course you can use multiple filters like so: `name:php tag:Scanner`.
+
+    <h2 id="tags">Tags</h2>
     You can set a tag to a file from a pre-determined list. Then using this tags you can search for any sample we
     already scanned and view its information.
 
