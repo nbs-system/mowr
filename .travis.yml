@@ -21,6 +21,7 @@ services:
 
 before_script:
   - psql -c 'create database mowrtest;' -U postgres
+  - psql -d mowrtest -c 'create extension fuzzystrmatch;' -U postgres
 
 script:
   - nose2

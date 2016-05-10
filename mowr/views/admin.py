@@ -1,17 +1,17 @@
-import os
-import datetime
 import collections
+import datetime
+import os
 
 import six
 from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
 from werkzeug.utils import secure_filename
 
+from lib.analyzers.archiveanalyser import ArchiveAnalyser
+from lib.common import search
 from mowr import db
 from mowr.models.analysis import Analysis
 from mowr.models.sample import Sample
-from mowr.views.common import search
 from mowr.models.tag import Tag
-from mowr.analyzers.legit import Legit
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -58,7 +58,7 @@ def whitelist():
         except OSError:
             flash('Error while saving the file. Aborting.', 'error')
 
-        zipfile = Legit(saveloc, request.form.get('type', ''))
+        zipfile = ArchiveAnalyser(saveloc, request.form.get('type', ''))
         zipfile.analyse()
         os.remove(saveloc)
     return render_template('admin/whitelist.html', file_types=current_app.config.get('FILE_TYPES'))

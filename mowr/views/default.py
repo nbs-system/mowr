@@ -3,12 +3,12 @@ import hashlib
 from os import chmod
 
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app, session
+from werkzeug.security import safe_str_cmp
 
+from lib.analyzers import Analyser
 from mowr import db
-from mowr.analyzers.analyser import Analyser
 from mowr.models.sample import Sample
 from mowr.models.tag import Tag
-from mowr.views.common import search, constant_time_compare
 
 default = Blueprint('default', __name__, static_folder='../static', static_url_path='/static')
 
@@ -75,8 +75,9 @@ def analysis(analysis_type, sha256):
         abort(404)
 
     suggest_reanalyse = datetime.datetime.utcnow() - sample.last_analysis > datetime.timedelta(days=90)
+    neighbours = sample.get_neighbours()
     return render_template('analysis.html', sample=sample, analysis_type=analysis_type,
-                           tag_list=Tag.get_all(), reanalyse=suggest_reanalyse)
+                           tag_list=Tag.get_all(), reanalyse=suggest_reanalyse, neighbours=neighbours)
 
 
 @default.route('/analyse/<analysis_type>/<sha256>', methods=['GET', 'POST'])
@@ -95,7 +96,7 @@ def login():
     if request.method == 'POST':
         # Check input
         if request.form.get('login') == current_app.config['ADMIN_LOGIN']:
-            if constant_time_compare(request.form.get('password'), current_app.config['ADMIN_PASSWORD']):
+            if safe_str_cmp(request.form.get('password'), current_app.config['ADMIN_PASSWORD']):
                 session['login'] = request.form.get('login')
                 return redirect(url_for('admin.index'))
         else:

@@ -3,7 +3,8 @@
 {% block content %}
     {% if reanalyse %}
         <div class="alert alert-info">This file has been last analysed a long time ago. Do you want to <a
-                href="{{ url_for('default.analyse', sha256=sample.sha256, analysis_type=analysis_type) }}">reanalyse it</a> ?
+                href="{{ url_for('default.analyse', sha256=sample.sha256, analysis_type=analysis_type) }}">reanalyse
+            it</a> ?
         </div>
     {% endif %}
     <div class="row">
@@ -15,8 +16,10 @@
                 <canvas id="canvas-ratio"></canvas>
                 <div id="ratio-textfield" style="font-size: 24px;">1</div>
                 <div class="vote">
-                    <a href="#" id="vote_clean" onclick="vote('{{ sample.sha256 }}', 'clean')"><i class="glyphicon glyphicon-check"></i></a>
-                    <a href="#" id="vote_malicious" onclick="vote('{{ sample.sha256 }}', 'malicious')"><i class="glyphicon glyphicon-alert"></i></a>
+                    <a href="#" id="vote_clean" onclick="vote('{{ sample.sha256 }}', 'clean')"><i
+                            class="glyphicon glyphicon-check"></i></a>
+                    <a href="#" id="vote_malicious" onclick="vote('{{ sample.sha256 }}', 'malicious')"><i
+                            class="glyphicon glyphicon-alert"></i></a>
                 </div>
             </div>
         </div>
@@ -87,6 +90,14 @@
             </td>
         </tr>
         <tr>
+            <td>Neighbours</td>
+            <td>
+                {% for neighbour in neighbours %}
+                    <a href="{{ url_for('default.analysis', analysis_type=analysis_type, sha256=neighbour.sha256) }}">{{ neighbour.sha256 }}</a>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
             <td colspan="2" class="active">Sample analysis</td>
         </tr>
         {% for analysis in sample.analyzes %}
@@ -112,7 +123,7 @@
     </div>
 {% endblock %}
 {% block script %}
-    <script src="{{ url_for('static', filename='js/gauge.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gauge/gauge.min.js') }}"></script>
     <script>
         var opts = {
             lines: 12, // The number of lines to draw

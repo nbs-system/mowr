@@ -4,14 +4,21 @@
 Mowr is a [virustotal]( https://www.virustotal.com/ )-like web application aiming at halping to detect malicious web files.
 
 # Usage
+## Requirements
 This application uses [PostgreSQL]( http://www.postgresql.org/ ), if you do not already have it, please download and install it.
-Also it uses [PMF](https://github.com/nbs-system/php-malware-finder) so you will need to clone it with the project.
+Create a database like below. Please note that the `strfuzzymatch` module from postgresql is required so you will need to add it.
 ```
-git clone https://github.com/xarkes/mowr --depth 1
+createdb mowr
+psql -d mowr -c "CREATE EXTENSION fuzzystrmatch;"
+```
+
+Also it uses [PMF](https://github.com/nbs-system/php-malware-finder), which can be cloned with the project.
+
+## Installation
+```
+git clone https://github.com/xarkes/mowr --depth 1 --recursive
 cd mowr
-git submodule init
-git submodule update
-pip install -r requirements.txt
+pip install --user -r requirements.txt
 python mowr-server.py
 ```
 

@@ -1,16 +1,16 @@
 import hashlib
 import os
-
-import zipfile
 import shutil
+import zipfile
+
 from flask import flash, current_app
 
-from mowr.analyzers.analyser import Analyser
+from lib.analyzers import Analyser
 
 MAX_SIZE = 1024 * 1024 * 15
 
 
-class Legit(object):
+class ArchiveAnalyser(object):
     def __init__(self, path, analysis):
         self.path = path
         self.analysis = analysis or 'PHP'
