@@ -1,5 +1,5 @@
 import datetime
-from hashlib import sha256
+import hashlib
 from os import chmod
 
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app, session
@@ -8,7 +8,7 @@ from mowr import db
 from mowr.analyzers.analyser import Analyser
 from mowr.models.sample import Sample
 from mowr.models.tag import Tag
-from mowr.views.common import search
+from mowr.views.common import search, constant_time_compare
 
 default = Blueprint('default', __name__, static_folder='../static', static_url_path='/static')
 
@@ -32,7 +32,7 @@ def upload():
         abort(413)
 
     # Check the file sha256 and if it has already been analysed
-    sha256sum = sha256(file.stream.read()).hexdigest()
+    sha256sum = hashlib.sha256(file.stream.read()).hexdigest()
 
     # If already exists ask what to do
     if sample_exists(analysis_type=analysis_type, sha256=sha256sum) == "OK":
@@ -82,7 +82,6 @@ def analysis(analysis_type, sha256):
 @default.route('/analyse/<analysis_type>/<sha256>', methods=['GET', 'POST'])
 def analyse(analysis_type, sha256):
     """ Reanalyse a sample """
-    # TODO we should check for spamming users
     Analyser(sha256=sha256, analysis_type=analysis_type, analyse=True)
     return redirect(url_for('default.analysis', sha256=sha256, analysis_type=analysis_type))
 
@@ -95,9 +94,8 @@ def login():
 
     if request.method == 'POST':
         # Check input
-        # TODO side channel ?
-        if request.form.get('password') == current_app.config['ADMIN_PASSWORD']:
-            if request.form.get('login') == current_app.config['ADMIN_LOGIN']:
+        if request.form.get('login') == current_app.config['ADMIN_LOGIN']:
+            if constant_time_compare(request.form.get('password'), current_app.config['ADMIN_PASSWORD']):
                 session['login'] = request.form.get('login')
                 return redirect(url_for('admin.index'))
         else:

@@ -1,5 +1,7 @@
 from flask import session, flash
 from sqlalchemy.exc import DataError
+import dateutil.parser
+import datetime
 
 from mowr import db
 from mowr.analyzers.pmfanalyser import PmfAnalyser
@@ -27,6 +29,10 @@ class Analyser(object):
             sample.analyzes.append(analysis)
             db.session.add(sample)
         else:
+            # Check last analysis
+            if sample.last_analysis < (sample.last_analysis + datetime.timedelta(days=3)):
+                return False
+
             # Update already existing analysis
             for anal in sample.analyzes:
                 if anal.type == self.type:

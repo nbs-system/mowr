@@ -48,14 +48,15 @@ def search(query='', page=1):  # TODO factorize/simplify
         # Execute the query
         if subq2 is not None and tags is not None:
             samples = Sample.query.filter(*sql_params).join(subq2, Sample.sha256 == subq2.c.sha256).join(tags,
-                                                                                                  tags.c.sample_sha256 == Sample.sha256).join(
+                                                                                                         tags.c.sample_sha256 == Sample.sha256).join(
                 Tag, tags.c.tag_id == Tag.id).paginate(page, PER_PAGE)
         elif tags is not None:
             samples = Sample.query.filter(*sql_params).join(tags,
-                                                     tags.c.sample_sha256 == Sample.sha256).join(
+                                                            tags.c.sample_sha256 == Sample.sha256).join(
                 Tag, tags.c.tag_id == Tag.id).paginate(page, PER_PAGE)
         elif subq2 is not None:
-            samples = Sample.query.filter(*sql_params).join(subq2, Sample.sha256 == subq2.c.sha256).paginate(page, PER_PAGE)
+            samples = Sample.query.filter(*sql_params).join(subq2, Sample.sha256 == subq2.c.sha256).paginate(page,
+                                                                                                             PER_PAGE)
         else:
             samples = Sample.query.filter(*sql_params).paginate(page, PER_PAGE)
     else:
@@ -67,3 +68,22 @@ def search(query='', page=1):  # TODO factorize/simplify
                 subq.c.name.like('%{val}%'.format(val=query))).subquery()
             samples = Sample.query.join(subq2, Sample.sha256 == subq2.c.sha256).paginate(page, PER_PAGE)
     return samples
+
+
+# Taken from Django Source Code`1   3
+def constant_time_compare(val1, val2):
+    """
+    Returns True if the two strings are equal, False otherwise.
+
+    The time taken is independent of the number of characters that match.
+
+    For the sake of simplicity, this function executes in constant time only
+    when the two strings have the same length. It short-circuits when they
+    have different lengths.
+    """
+    if len(val1) != len(val2):
+        return False
+    result = 0
+    for x, y in zip(val1, val2):
+        result |= ord(x) ^ ord(y)
+    return result == 0
