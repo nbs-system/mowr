@@ -5,7 +5,7 @@ import zipfile
 
 from flask import flash, current_app
 
-from lib.analyzers import Analyser
+from mowr.lib.analyzers import Analyser
 
 MAX_SIZE = 1024 * 1024 * 15
 

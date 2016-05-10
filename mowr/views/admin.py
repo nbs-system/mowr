@@ -6,8 +6,8 @@ import six
 from flask import render_template, Blueprint, current_app, session, redirect, url_for, request, flash, abort
 from werkzeug.utils import secure_filename
 
-from lib.analyzers.archiveanalyser import ArchiveAnalyser
-from lib.common import search
+from mowr.lib.analyzers.archiveanalyser import ArchiveAnalyser
+from mowr.lib.common import search
 from mowr import db
 from mowr.models.analysis import Analysis
 from mowr.models.sample import Sample

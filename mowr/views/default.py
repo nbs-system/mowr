@@ -5,10 +5,11 @@ from os import chmod
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app, session
 from werkzeug.security import safe_str_cmp
 
-from lib.analyzers import Analyser
+from mowr.lib.analyzers import Analyser
 from mowr import db
 from mowr.models.sample import Sample
 from mowr.models.tag import Tag
+from mowr.lib.common import search
 
 default = Blueprint('default', __name__, static_folder='../static', static_url_path='/static')
 
