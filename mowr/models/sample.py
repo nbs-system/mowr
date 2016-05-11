@@ -97,7 +97,8 @@ class Sample(db.Model):
         return -sum(count / lns * math.log(count / lns, 2) for count in p.values())
 
     def get_neighbours(self):
-        neighbours = Sample.query.filter(db.func.levenshtein(self.ssdeep, Sample.ssdeep) < 25)
+        leven = db.func.levenshtein(self.ssdeep, Sample.ssdeep)
+        neighbours = Sample.query.filter(leven < 25)
         # The above 25 is totally arbitrary, maybe you will want to modify it someday :)
-        neighbours = neighbours.filter(Sample.sha256 != self.sha256)
+        neighbours = neighbours.filter(Sample.sha256 != self.sha256).order_by(leven).limit(20)
         return neighbours.all()
