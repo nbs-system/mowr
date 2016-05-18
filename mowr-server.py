@@ -14,7 +14,7 @@ def run(host, port):
     """ Run the app normally """
     app = create_app(__get_config_file())
     app.threaded = True
-    app.debug = True
+    app.debug = False
 
     # Avoid creating a new key each time a file is modified
     if app.debug:
