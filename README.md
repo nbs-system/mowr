@@ -13,14 +13,28 @@ psql -d mowr -c "CREATE EXTENSION fuzzystrmatch;"
 ```
 
 Also it uses [PMF](https://github.com/nbs-system/php-malware-finder), which can be cloned with the project.
+Some python extensions require dev library to be build, so you will have to install it as well.
 
 ## Installation
 ```
 git clone https://github.com/xarkes/mowr --depth 1 --recursive
 cd mowr
+
+## The packages below are required to build some requirements
+apt install gcc
+apt install python-dev
+apt install libffi-dev
+apt install libfuzzy-dev
+apt install postgresql-server-dev-9.4
+apt install postgresql-contrib-9.4
+
 pip install --user -r requirements.txt
 python mowr-server.py
 ```
+
+## Configuration
+To configure the server, edit `config.cfg` to set the sql server port and host, the administrator login and password,
+and `mowr-server.py` to edit the port the server runs on.
 
 # Technical choices
 ## ~~Why nosql ?~~
