@@ -181,13 +181,13 @@ def get_stats():
 
     # Compute the samples on-disk size
     up_folder = current_app.config.get('UPLOAD_FOLDER')
-    file_size = sum(os.path.getsize(os.path.join(up_folder, f)) for f in os.listdir(up_folder))
+    files_size = sum(os.path.getsize(os.path.join(up_folder, f)) for f in os.listdir(up_folder)) / 2.0**30 #Get it in GB
     st = os.statvfs(up_folder)
 
     # Compute the remaining free space
-    remaining_storage = st.f_bavail * st.f_frsize
+    remaining_storage = st.f_bavail * st.f_frsize / 2.0**30 # Get it in GB
 
-    disk_usage = dict(file_size=file_size, remaining_storage=remaining_storage)
+    disk_usage = dict(file_size=round(files_size,2), remaining_storage=round(remaining_storage,2))
 
     # Last 7 days dates from oldest to newest
     today = datetime.datetime.today().replace(minute=0, hour=0, second=0, microsecond=0)

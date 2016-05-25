@@ -6,7 +6,7 @@
         <form action="{{ url_for('default.upload') }}" method="post" enctype="multipart/form-data" class="dropzone"
               id="dropzone">
             <label for="select_type">File type ?</label>
-            <select id="select_type" name="type">
+            <select class="selectpicker"id="select_type" name="type">
                 {% for option in file_types %}
                     <option value="{{ option }}">{{ option }}</option>
                 {% endfor %}
