@@ -145,7 +145,8 @@ class AdminTestCase(unittest.TestCase):
         ), follow_redirects=True)
         self.assertFalse(os.access(os.path.join(self.config.get('UPLOAD_FOLDER'), 'samples.zip'), os.R_OK))
         self.assertTrue(os.access(os.path.join(self.config.get('UPLOAD_FOLDER'),
-                                               'f16a149d97127fdf6280ac92df82dfca266a476a0d5df559693ec2c31898a7b5'),
+                            datetime.date.today().strftime('%Y-%m'),
+                            'f16a149d97127fdf6280ac92df82dfca266a476a0d5df559693ec2c31898a7b5'),
                                   os.R_OK))
 
     def test_tags(self):

@@ -11,4 +11,5 @@ def __get_config_file():
 app = create_app(__get_config_file())
 
 if __name__ == '__main__':
+    app.debug = True
     app.run(host='0.0.0.0')

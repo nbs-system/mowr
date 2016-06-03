@@ -52,8 +52,9 @@ class Sample(db.Model):
 
     @staticmethod
     def get_file_path(sha256sum):
-        """ Return the FileSystem path to the current sample """
-        return os.path.join(current_app.config.get('UPLOAD_FOLDER'), sha256sum)
+        return os.path.join(current_app.config.get('UPLOAD_FOLDER'),
+                            datetime.date.today().strftime('%Y-%m'),
+                            sha256sum)
 
     @staticmethod
     def get(sha256):
@@ -62,6 +63,12 @@ class Sample(db.Model):
         :return None: If not found
         """
         return Sample.query.filter_by(sha256=sha256).first()
+
+    def get_file(self):
+        """ Return the FileSystem path to the sample """
+        return os.path.join(current_app.config.get('UPLOAD_FOLDER'),
+                            self.first_analysis.strftime('%Y-%m'),
+                            self.sha256)
 
     def compute_hashes(self):
         """ Compute the file hashes """

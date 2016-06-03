@@ -58,7 +58,7 @@ def whitelist():
         except OSError:
             flash('Error while saving the file. Aborting.', 'error')
 
-        zipfile = ArchiveAnalyser(saveloc, request.form.get('type', ''))
+        zipfile = ArchiveAnalyser(saveloc, request.form.get('type', 'PHP'))
         zipfile.analyse()
         os.remove(saveloc)
     return render_template('admin/whitelist.html', file_types=current_app.config.get('FILE_TYPES'))

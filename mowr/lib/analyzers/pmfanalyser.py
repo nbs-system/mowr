@@ -9,10 +9,10 @@ from mowr.models.sample import Sample
 
 
 class PmfAnalyser(Analysis):
-    def __init__(self, analysis_type, sha256):
+    def __init__(self, analysis_type, filename):
         self.type = analysis_type
         self.soft = 'PMF'
-        self.sample_sha256 = sha256
+        self.filename = filename
         self.analyse()
 
     def analyse(self):
@@ -22,7 +22,7 @@ class PmfAnalyser(Analysis):
         rules = yara.compile(rule_file)
 
         try:
-            with open(Sample.get_file_path(self.sample_sha256), 'rb') as f:
+            with open(Sample.get_file_path(self.filename), 'rb') as f:
                 matches = rules.match(data=f.read())
         except OSError:
             flash('Error while reanalysing the file.', 'danger')

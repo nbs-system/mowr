@@ -1,6 +1,6 @@
 import datetime
 import hashlib
-from os import chmod
+import os
 
 from flask import render_template, request, redirect, abort, url_for, flash, Blueprint, current_app, session
 from werkzeug.security import safe_str_cmp
@@ -39,15 +39,27 @@ def upload():
     if sample_exists(analysis_type=analysis_type, sha256=sha256sum) == "OK":
         return redirect(url_for('default.choose', sha256=sha256sum, analysis_type=analysis_type))
 
-    newfile = Sample.get_file_path(sha256sum)  # If it is the first time, save the file to the correct location
+    # If it is the first time, save the file to the correct location
+    folder = os.path.join(current_app.config.get('UPLOAD_FOLDER'), datetime.date.today().strftime('%Y-%m'))
+
+    # Make sure the destination is writeable
+    if not os.access(folder, os.W_OK):
+        try:
+            os.mkdir(folder)
+        except OSError:
+            flash('There was an error while trying to save the file.', 'danger')
+            return redirect(url_for('default.index'))
+
+    newfile = os.path.join(folder, sha256sum)
     file.stream.seek(0)  # Seek is needed because of the above file.stream.read()
     try:
         file.save(newfile)
     except OSError:
         flash('The file could not be saved.', 'danger')
+        return redirect(url_for('default.index'))
 
     # Chmod the file to prevent it from being executed
-    chmod(newfile, 0o400)
+    os.chmod(newfile, 0o400)
 
     # Then analyse it and show results
     analyser = Analyser(sha256=sha256sum, name=file.filename, analysis_type=analysis_type)

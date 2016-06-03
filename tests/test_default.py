@@ -1,6 +1,9 @@
 import os
 import unittest
+import shutil
 from io import BytesIO as StringIO
+
+import datetime
 
 from mowr import create_app
 from mowr import db
@@ -36,10 +39,9 @@ class DefaultTestCase(unittest.TestCase):
         db.drop_all()
         db.create_all()
         # Remove files from test folder
-        for f in os.listdir(app.config['UPLOAD_FOLDER']):
-            # Do not delete any file, just sha256 looking one (in case of configuration mistake)
-            if len(f) == 64:
-                os.remove('{0}/{1}'.format(app.config['UPLOAD_FOLDER'], f))
+        folder = os.path.join(app.config['UPLOAD_FOLDER'], datetime.date.today().strftime('%Y-%m'))
+        if os.access(folder, os.R_OK):
+            shutil.rmtree(folder)
         # Upload a file
         self.app.post('/upload', data=dict(
             file=(StringIO(global_content), file_name),

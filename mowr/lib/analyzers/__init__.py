@@ -18,22 +18,23 @@ class Analyser(object):
 
     def analyse(self):
         """ Analyse the sample """
-        analysis = PmfAnalyser(self.type, self.sha256)
 
         # New sample ? New analysis ?
         sample = Sample.get(self.sha256)
         if sample is None:
             # New sample, let's add it !
+            analysis = PmfAnalyser(self.type, self.sha256)
             sample = Sample(sha256=self.sha256, name=self.name)
             sample.compute_hashes()
             sample.analyzes.append(analysis)
             db.session.add(sample)
         else:
-            # Check last analysis
+            # Do not reanalyse the file if it's been analysed a few days ago
             if sample.last_analysis < (sample.last_analysis + datetime.timedelta(days=3)):
-                return False
+                return True
 
             # Update already existing analysis
+            analysis = PmfAnalyser(self.type, sample.get_file())
             for anal in sample.analyzes:
                 if anal.type == self.type:
                     anal.result = analysis.result
