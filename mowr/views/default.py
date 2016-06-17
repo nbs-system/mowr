@@ -51,12 +51,13 @@ def upload():
             return redirect(url_for('default.index'))
 
     newfile = os.path.join(folder, sha256sum)
-    file.stream.seek(0)  # Seek is needed because of the above file.stream.read()
-    try:
-        file.save(newfile)
-    except OSError:
-        flash('The file could not be saved.', 'danger')
-        return redirect(url_for('default.index'))
+    if not os.access(newfile, os.R_OK):
+        file.stream.seek(0)  # Seek is needed because of the above file.stream.read()
+        try:
+            file.save(newfile)
+        except OSError:
+            flash('The file could not be saved.', 'danger')
+            return redirect(url_for('default.index'))
 
     # Chmod the file to prevent it from being executed
     os.chmod(newfile, 0o400)

@@ -15,7 +15,7 @@ class Analysis(db.Model):
     @validates('analysis_time')
     def validate_analysis_time(self, key, analysis_time):
         try:
-            analysis_time = int(analysis_time)
+            analysis_time = float(analysis_time)
         except ValueError:
             analysis_time = 0
         return analysis_time
