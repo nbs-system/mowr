@@ -24,7 +24,7 @@ class Tag(db.Model):
         self.color = color
 
     def __str__(self):
-        return '<a class="label label-' + self.color + '" href="#">' + self.name + '</a>'
+        return '<span class="label label-' + self.color + '">' + self.name + '</span>'
 
     @validates('name')
     def format_name(self, key, name):

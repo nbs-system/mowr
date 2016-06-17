@@ -24,8 +24,12 @@
                 </div>
                 <div class="form-group">
                     <label for="tags">Tags</label>
-                    <input id="tags" type="text" name="tags" class="form-control"
-                           value="{{ ', '.join(names) }}">
+                    <div>
+                        {% for tag in tags %}
+                            <input id="tag_{{ tag.name }}" type="checkbox" name="tag_{{ tag.id }}"{% if tag in sample.tags %}
+                                   checked="checked"{% endif %}><label for="tag_{{ tag.name }}">{{ tag | safe }}</label>
+                        {% endfor %}
+                    </div>
                 </div>
                 <input class="btn btn-warning" type="submit" value="Edit">
             </form>

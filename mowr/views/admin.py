@@ -130,19 +130,14 @@ def edit(sha256):
     sample = Sample.get(sha256)
     if sample:
         all_tags = Tag.get_all()
-        if request.method == 'POST':  # Reformat what is needed
-            tag_input = request.form.get('tags', '').replace(' ', '').split(',')
-
+        if request.method == 'POST':
+            all_tags_id = [tag.id for tag in all_tags]
             tag_list = []
-            for i, tag_name in enumerate(tag_input):
-                if not tag_name:
-                    continue
-                if tag_name not in (tag.name for tag in all_tags):
-                    flash('The tag %s is not in the allowed tags list.' % tag_name, 'error')
-                    return redirect(url_for('admin.edit', sha256=sha256))
-                tag_list.append(all_tags[i])
-
-            # Update2
+            for value in request.form:
+                if value.startswith('tag_'):
+                    id = int(value[4:])
+                    if id in all_tags_id:
+                        tag_list.append(Tag.get(id))
             sample.name = request.form.get('name', '').replace(' ', '').split(',')
             sample.mime = request.form.get('mime', '')
             sample.first_analysis = request.form.get('first_analysis', '')
@@ -152,7 +147,7 @@ def edit(sha256):
             db.session.commit()
             return redirect(url_for('admin.samples'))
 
-        return render_template('admin/edit.html', sample=sample, names=[tag.name for tag in sample.tags])
+        return render_template('admin/edit.html', sample=sample, names=[tag.name for tag in sample.tags], tags=all_tags)
     abort(404)
 
 
