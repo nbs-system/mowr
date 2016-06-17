@@ -120,7 +120,7 @@ class AdminTestCase(unittest.TestCase):
         # Log in
         self.login()
         rv = self.app.get('/admin/whitelist').data.decode('utf-8')
-        self.assertIn('<h2>Whitelist</h2>', rv)
+        self.assertIn('<h2>Archive upload</h2>', rv)
 
         # Post a file
         # With no file
