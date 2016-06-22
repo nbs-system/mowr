@@ -37,8 +37,6 @@ To configure the server, edit `config.cfg` to set the sql server port and host, 
 and `mowr-server.py` to edit the port the server runs on.
 
 # Technical choices
-## ~~Why nosql ?~~
-~~The project doesn't need relational database, since it only uses one unique table in which we do various kind of different searches, hence NoSQL.~~
 ## Why PostgreSQL ?
 The project required a database to store each sample analysis. At first we used NoSQL with MongoDB which was in a first place interesting,
 because we didn't need any relation between file analyzes.
@@ -96,5 +94,5 @@ That's it, mowr will load it for any new analyzes.
 
 ![Administration interface](/docs/admin.png?raw=true "Administration interface")
 
-# License
-COMING SOON (Right ?)
+# [License](https://github.com/xarkes/mowr/blob/master/LICENSE.txt)
+`GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007`
