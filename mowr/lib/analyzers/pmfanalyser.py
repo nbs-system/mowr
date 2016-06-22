@@ -9,6 +9,10 @@ from mowr.models.sample import Sample
 
 
 class PmfAnalyser(Analysis):
+    path = "php-malware-finder/php-malware-finder/"
+    binary = "phpmalwarefinder"
+    types = ['PHP', 'ASP']
+
     def __init__(self, analysis_type, filename):
         self.type = analysis_type
         self.soft = 'PMF'
@@ -18,7 +22,7 @@ class PmfAnalyser(Analysis):
     def analyse(self):
         """ Analyse the file with PMF """
         start = time.time()
-        rule_file = os.path.join(current_app.config.get('PMF_PATH'), self.type.lower() + '.yar')
+        rule_file = os.path.join(current_app.config.get('BASE_DIR'), self.path, self.type.lower() + '.yar')
         rules = yara.compile(rule_file)
 
         try:

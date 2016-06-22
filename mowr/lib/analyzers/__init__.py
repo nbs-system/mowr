@@ -1,9 +1,9 @@
 import datetime
+import importlib
 
-from flask import session, flash
+from flask import session, flash, current_app
 from sqlalchemy.exc import DataError
 
-from mowr.lib.analyzers.pmfanalyser import PmfAnalyser
 from mowr import db
 from mowr.models.sample import Sample
 
@@ -17,31 +17,20 @@ class Analyser(object):
             self.analyse()
 
     def analyse(self):
-        """ Analyse the sample """
-
         # New sample ? New analysis ?
         sample = Sample.get(self.sha256)
         if sample is None:
             # New sample, let's add it !
-            analysis = PmfAnalyser(self.type, self.sha256)
             sample = Sample(sha256=self.sha256, name=self.name)
             sample.compute_hashes()
-            sample.analyzes.append(analysis)
-            db.session.add(sample)
         else:
-            # Do not reanalyse the file if it's been analysed a few days ago
+            # Too recent do not analyse it
             if sample.last_analysis < (sample.last_analysis + datetime.timedelta(days=3)):
                 return True
-
-            # Update already existing analysis
-            analysis = PmfAnalyser(self.type, sample.get_file())
-            for anal in sample.analyzes:
-                if anal.type == self.type:
-                    anal.result = analysis.result
-                    anal.analysis_time = analysis.analysis_time
-                    break
-            else:  # Or add the new analysis
-                sample.analyzes.append(analysis)
+            # Update last analysis date
+            sample.last_analysis = datetime.date.today()
+        self.do_analyzes(sample)
+        db.session.add(sample)
 
         # Commit database
         try:
@@ -53,6 +42,18 @@ class Analyser(object):
         # Allow the user to vote for his sample
         session['can_vote'] = self.sha256
         return True
+
+    def do_analyzes(self, sample):
+        # Already have analysis ? Delete it.
+        if sample.analyzes is not None:
+            for analysis in sample.analyzes:
+                db.session.delete(analysis)
+            db.session.commit()
+        for analyser in current_app.config.get('ENABLED_ANALYZERS'):
+            mod = importlib.import_module("mowr.lib.analyzers." + analyser.lower())
+            cls = getattr(mod, analyser)
+            if self.type in cls.types:
+                sample.analyzes.append(cls(self.type, self.sha256))
 
     @staticmethod
     def add_name(sha256, name):

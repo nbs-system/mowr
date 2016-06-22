@@ -56,6 +56,36 @@ As said above, MySQL didn't appear to be an interesting choice. Python was chose
 The administration interface is using [Gentelella](https://github.com/puikinsh/gentelella) which is a nice template to quickly make a pretty
 admin interface with cool statistics
 
+# Customization
+You can add another analyser quite easily since they are loaded dynamically.
+Just create a new file (using lowercase) inside the `mowr/lib/analyzers/` directory and put at least this inside:
+```python
+class MynewAnalyser(Analysis):
+    path = "myanalyser" # Path to the external depedencies root folder
+    binary = "phpmalwarefinder" # Path to the external binary to call
+    types = ['PHP', 'ASP'] # This analyser can handle those types of file
+
+    def __init__(self, analysis_type, filename):
+        self.type = analysis_type
+        self.soft = 'MyNew'
+        self.filename = filename
+        self.analyse()
+
+    def analyse(self):
+        start = time.time()
+        # Do your analysis here as you want to do it ...
+        content = """Result here"""
+        self.analysis_time = time.time() - start
+        self.result = content
+        return True
+```
+Be careful, the name of your class must be the same as your filename.
+Now, enable your new analyser in the configuration:
+```ini
+ENABLED_ANALYZERS = ['PmfAnalyser', 'MynewAnalyser']
+```
+Again, the name here must be the same as the name of your class.
+That's it, mowr will load it for any new analyzes.
 
 # Screenshots
 ![Index page](/docs/index.png?raw=true "Index page")

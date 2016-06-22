@@ -11,7 +11,7 @@ from mowr.models.sample import Sample
 
 MAX_SIZE = 1024 * 1024 * 15
 
-
+# TODO Not really an analyser maybe it should be moved somewhere else
 class ArchiveAnalyser(object):
     def __init__(self, path, analysis):
         self.path = path

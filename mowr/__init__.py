@@ -1,12 +1,40 @@
 import base64
 import os
 import logging
+import importlib
 
 from flask import Flask, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import OperationalError
 
+logging.basicConfig()
+logger = logging.getLogger("mowr")
+logger.setLevel(logging.INFO)
+
 db = SQLAlchemy()
+
+
+def load_analyzers(app):
+    analyzers = app.config.get('ENABLED_ANALYZERS')
+    for analyser in analyzers:
+        error = False
+        try:
+            mod = importlib.import_module("mowr.lib.analyzers." + analyser.lower())
+            cls = getattr(mod, analyser)
+            path = os.path.join(app.config.get('BASE_DIR'), cls.path, cls.binary)
+            if not os.access(path, os.R_OK):
+                logging.warning("Could not access this file: %s" % path)
+                error = True
+        except ImportError:
+            logger.warning("Could not import the module %s" % analyser)
+            error = True
+        if error:
+            analyzers.remove(analyser)
+    app.config['ENABLED_ANALYZERS'] = analyzers
+    if len(analyzers) < 1:
+        logger.error("There are no analyser enabled. Exiting.")
+        exit(1)
+    logger.info("Those modules were loaded: %s" % analyzers)
 
 
 def create_app(config_filename=''):
@@ -18,27 +46,20 @@ def create_app(config_filename=''):
     db.init_app(app)
     db.app = app
 
-    # Check PMF Path
-    pmf_default_path = 'php-malware-finder/php-malware-finder'
-    if os.access(pmf_default_path, os.R_OK):
-        app.config['PMF_PATH'] = pmf_default_path
-    elif not os.access(app.config['PMF_PATH'], os.R_OK):
-        logging.error(
-            "Could not access PMF binary. Please clone the repository"
-            " in the root folder or update the configuration (PMF_PATH).")
-        exit(1)
+    app.config['BASE_DIR'] = os.path.dirname(os.path.dirname(__file__))
+    load_analyzers(app)
 
     # Check upload folder access
     if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
         try:
             os.mkdir(app.config['UPLOAD_FOLDER'])
         except OSError:
-            logging.error("%s is not writable. Please update the configuration (UPLOAD_FOLDER)." % app.config['UPLOAD_FOLDER'])
+            logger.error("%s is not writable. Please update the configuration (UPLOAD_FOLDER)." % app.config['UPLOAD_FOLDER'])
             exit(1)
 
     # Make sure the analysis types are ok
     if app.config.get('FILE_TYPES') is None or len(app.config.get('FILE_TYPES')) == 0:
-        logging.error("Analysis types seems wrong (%s). Please update your configuration (UPLOAD_FOLDER)." % app.config[
+        logger.error("Analysis types seems wrong (%s). Please update your configuration (UPLOAD_FOLDER)." % app.config[
             'FILE_TYPES'])
         exit(1)
 
@@ -49,10 +70,9 @@ def create_app(config_filename=''):
 
     # Drop and create database because it's fun
     try:
-        #db.drop_all()
         db.create_all()
     except OperationalError:
-        logging.error("Could not connect to the database. Check your configuration and server settings.")
+        logger.error("Could not connect to the database. Check your configuration and server settings.")
         exit(1)
 
     # Error handlers

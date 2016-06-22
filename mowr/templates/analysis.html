@@ -103,7 +103,7 @@
         {% for analysis in sample.analyzes %}
             {% if analysis.type == analysis_type %}
                 <tr>
-                    <td>PMF</td>
+                    <td>{{ analysis.soft }}</td>
                     {% if not analysis and analysis.result|length == 0 %}
                         <td>
                             <div class="clean">Clean <span class="glyphicon glyphicon-ok-sign"></span></div>
