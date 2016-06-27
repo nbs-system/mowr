@@ -58,10 +58,26 @@ admin interface with cool statistics
 You can add another analyser quite easily since they are loaded dynamically.
 Just create a new file (using lowercase) inside the `mowr/lib/analyzers/` directory and put at least this inside:
 ```python
+import os
+import time
+
+from mowr.models.analysis import Analysis
+
 class MynewAnalyser(Analysis):
-    path = "myanalyser" # Path to the external depedencies root folder
-    binary = "phpmalwarefinder" # Path to the external binary to call
     types = ['PHP', 'ASP'] # This analyser can handle those types of file
+    path = ""
+
+    @classmethod
+    def load(cls, app):
+        """ Returns True if the plugin has everything it needs """
+        if os.access('/the/path/to/here/', os.R_OK):
+            cls.path = '/the/path/to/here'
+            return True
+        elif os.access(os.path.join(app.config.get('BASE_DIR'), 'myplugin'), os.R_OK):
+            cls.path = os.path.join(app.config.get('BASE_DIR'), 'myplugin')
+            return True
+        # Can't access anything :(
+        return False
 
     def __init__(self, analysis_type, filename):
         self.type = analysis_type

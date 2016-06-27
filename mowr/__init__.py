@@ -17,14 +17,10 @@ db = SQLAlchemy()
 def load_analyzers(app):
     analyzers = app.config.get('ENABLED_ANALYZERS')
     for analyser in analyzers:
-        error = False
         try:
             mod = importlib.import_module("mowr.lib.analyzers." + analyser.lower())
             cls = getattr(mod, analyser)
-            path = os.path.join(app.config.get('BASE_DIR'), cls.path, cls.binary)
-            if not os.access(path, os.R_OK):
-                logging.warning("Could not access this file: %s" % path)
-                error = True
+            error = not cls.load(app)
         except ImportError:
             logger.warning("Could not import the module %s" % analyser)
             error = True

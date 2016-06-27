@@ -9,9 +9,27 @@ from mowr.models.sample import Sample
 
 
 class PmfAnalyser(Analysis):
-    path = "php-malware-finder/php-malware-finder/"
-    binary = "phpmalwarefinder"
     types = ['PHP', 'ASP']
+    path = ""
+
+    @classmethod
+    def load(cls, app):
+        """ Returns True if the software can be used """
+        if os.access('/etc/phpmalwarefinder', os.R_OK):
+            cls.path = '/etc/phpmalwarefinder/'
+            if (os.access('/etc/phpmalwarefinder/common.yar', os.R_OK)
+                and os.access('/etc/phpmalwarefinder/whitelist.yar', os.R_OK)
+                and os.access('/etc/phpmalwarefinder/asp.yar', os.R_OK)
+                and os.access('/etc/phpmalwarefinder/php.yar', os.R_OK)):
+                return True
+        elif os.access(os.path.join(app.config.get('BASE_DIR'), 'php-malware-finder/php-malware-finder'), os.R_OK):
+            cls.path = os.path.join(app.config.get('BASE_DIR'), 'php-malware-finder/php-malware-finder')
+            if (os.access(os.path.join(cls.path, 'common.yar'), os.R_OK)
+                and os.access(os.path.join(cls.path, 'whitelist.yar'), os.R_OK)
+                and os.access(os.path.join(cls.path, 'asp.yar'), os.R_OK)
+                and os.access(os.path.join(cls.path, 'php.yar'), os.R_OK)):
+                return True
+        return False
 
     def __init__(self, analysis_type, filename):
         self.type = analysis_type
