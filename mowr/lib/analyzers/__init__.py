@@ -25,7 +25,8 @@ class Analyser(object):
             sample.compute_hashes()
         else:
             # Too recent do not analyse it
-            if sample.last_analysis < (sample.last_analysis + datetime.timedelta(days=3)):
+            if (sample.last_analysis < (sample.last_analysis + datetime.timedelta(days=3))
+                    and len(sample.analyzes) == len(current_app.config.get('ENABLED_ANALYZERS'))):
                 return True
             # Update last analysis date
             sample.last_analysis = datetime.date.today()
