@@ -1,5 +1,5 @@
 # MOWR - More Obvious Web-malware Repository
-[![Build Status](https://travis-ci.org/nbs-system/mowr.svg?branch=master)](https://travis-ci.com/xarkes/mowr/)
+[![Build Status](https://travis-ci.org/nbs-system/mowr.svg?branch=master)](https://travis-ci.com/nbs-system/mowr/)
 
 Mowr is a [virustotal]( https://www.virustotal.com/ )-like web application aiming at halping to detect malicious web files.
 
@@ -17,7 +17,7 @@ Some python extensions require dev library to be build, so you will have to inst
 
 ## Installation
 ```
-git clone https://github.com/xarkes/mowr --depth 1 --recursive
+git clone https://github.com/nbs-system/mowr --depth 1 --recursive
 cd mowr
 
 ## The packages below are required to build some requirements
@@ -110,5 +110,5 @@ That's it, mowr will load it for any new analyzes.
 
 ![Administration interface](/docs/admin.png?raw=true "Administration interface")
 
-# [License](https://github.com/xarkes/mowr/blob/master/LICENSE.txt)
+# [License](https://github.com/nbs-system/mowr/blob/master/LICENSE.txt)
 `GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007`
