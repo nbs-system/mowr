@@ -1,5 +1,5 @@
 # MOWR - More Obvious Web-malware Repository
-[![Build Status](https://travis-ci.com/xarkes/mowr.svg?token=9Xzgra6ppqzjTnDcac9B&branch=master)](https://travis-ci.com/xarkes/mowr/)
+[![Build Status](https://travis-ci.org/nbs-system/mowr.svg?branch=master)](https://travis-ci.com/xarkes/mowr/)
 
 Mowr is a [virustotal]( https://www.virustotal.com/ )-like web application aiming at halping to detect malicious web files.
 
