@@ -4,9 +4,6 @@ python:
   - "2.7"
   - "3.5"
 
-git:
-  depth: 1
-
 cache:
   - pip
 
@@ -14,6 +11,7 @@ env:
   - BUILD_LIB=1
 
 install: 
+  - "git clone https://github.com/nbs-system/php-malware-finder"
   - "pip install -r requirements.txt"
 
 services: 

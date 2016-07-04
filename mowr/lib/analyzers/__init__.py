@@ -63,6 +63,8 @@ class Analyser(object):
         :param sha256: str
         :param name: str
         """
+        if name is None:
+            return
         sample = Sample.get(sha256=sha256)
         if name not in sample.name:  # Since name is an ARRAY (postgresql) we cannot use append()
             sample.name = sample.name + [name]

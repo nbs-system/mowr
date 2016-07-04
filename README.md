@@ -12,14 +12,20 @@ createdb mowr
 psql -d mowr -c "CREATE EXTENSION fuzzystrmatch;"
 ```
 
-Also it uses [PMF](https://github.com/nbs-system/php-malware-finder), which can be cloned with the project.
+Also it uses [PMF](https://github.com/nbs-system/php-malware-finder). You can either clone it into the mowr folder or you can install it on your system.
 Some python extensions require dev library to be build, so you will have to install it as well.
 
 ## Installation
 ```
-git clone https://github.com/nbs-system/mowr --depth 1 --recursive
+git clone https://github.com/nbs-system/mowr
 cd mowr
-
+```
+If you did not install PMF on your system via a package, you can clone it into `mowr` folder.
+```
+git clone https://github.com/nbs-system/php-malware-finder
+```
+Now you need to add some required packages.
+```
 ## The packages below are required to build some requirements
 apt install gcc
 apt install python-dev
