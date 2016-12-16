@@ -91,7 +91,10 @@ class Sample(db.Model):
         if self.ssdeep is None:
             self.ssdeep = ssdeep.hash(buf)
         if self.mime is None:
-            self.mime = magic.from_buffer(buf, mime=True).decode('utf-8')
+            try:
+                self.mime = magic.from_buffer(buf, mime=True).decode('utf-8')
+            except:
+                self.mime = None
         if self.entropy is None:
             self.entropy = self.compute_entropy(buf)
 
